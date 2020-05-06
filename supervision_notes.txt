@@ -1,0 +1,16 @@
+prebuilt datasets + own
+
+advocate why interactive graphs are better than books
+
+consider different types of plots for different types of variables and interations - scaling
+
+flies? how to deal with factors
+
+concept of participatory design -> asking potential users what they would find particularly important (second semetester students) -> meta-reflection in paper
+
+ground in e-learning theory
+	interactivity stuff
+		how do they motivate/facilitate learning
+
+potentially if prototype out early: show it to someone (or bring to exam)
+
