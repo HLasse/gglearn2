@@ -74,6 +74,10 @@ create_geom <- function(geom, color=NULL, fill=NULL, shape=NULL, alpha=NULL){
     return(NULL)
   }
   
+  color <- str_to_null(color)
+  fill<- str_to_null(fill)
+  shape <- str_to_null(shape)
+  alpha <- str_to_null(alpha)
   h <- hash("dens" = "geom_density()",
             "hist" = "geom_histogram()",
             "qq" ="geom_qq()",
