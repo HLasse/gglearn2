@@ -3,6 +3,11 @@ pacman::p_load(tidyverse, hash)
 
 create_init <- function(df = "dataset", x, y=NULL,
                         fill=NULL, color=NULL, shape=NULL){
+  y <- str_to_null(y)
+  fill <- str_to_null(fill)
+  color <- str_to_null(color)
+  shape <- str_to_null(shape)
+  
   if (is.null(y)){
     e_string <- paste0("ggplot(", df, ", aes(x = ", x, "))")
   } else {
@@ -177,6 +182,7 @@ create_custom_theme <- function(rm_legend = F){
 
 create_facet <- function(by){
   by <- str_to_null(by)
+  if(is.null(by)){return(NULL)}
   facet_str <- paste0("facet_wrap( ~ ", by, ")")
   return(facet_str)
 }
@@ -194,7 +200,7 @@ combine_string <- function(libraries = "library(ggplot2)",
   e_string <- paste(libraries, init_layer, sep ="\n\n")
   
   if (! is.null(facet)){
-    geoms <- c(geom, facet)
+    geoms <- c(geoms, facet)
   }
   for (geom in geoms){
     if (! is.null(geom)){
