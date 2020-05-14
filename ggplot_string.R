@@ -38,7 +38,6 @@ geom_add_arg <- function(geom_str, arg, name){
 }
 
 
-<<<<<<< HEAD
 check_length <- function(x, len){
   if (length(x) == len){
     return(x)
@@ -65,10 +64,7 @@ create_geom <- function(geom, color=NULL, fill=NULL, shape=NULL, alpha=NULL){
     }
     return(res)
   }
-  
-=======
-create_geom <- function(geom, color=NULL, fill=NULL, shape=NULL, alpha=NULL){
->>>>>>> 33aea06523a89cf2f6d271b74d482ad30150515e
+
   h <- hash("dens" = "geom_density()",
             "hist" = "geom_histogram()",
             "qq" ="geom_qq()",
@@ -168,13 +164,9 @@ create_custom_theme <- function(rm_legend = F){
 combine_string <- function(libraries = "library(ggplot2)",
                            init_layer,
                            geoms,
-<<<<<<< HEAD
                            labs = NULL,
                            theme_std = NULL,
                            theme_custom = NULL
-=======
-                           legends = NULL
->>>>>>> 33aea06523a89cf2f6d271b74d482ad30150515e
                            ){
   geoms <- paste0("\t", geoms)
   e_string <- paste(libraries, init_layer, sep ="\n\n")
@@ -188,11 +180,10 @@ combine_string <- function(libraries = "library(ggplot2)",
 }
 
 
-
-
+# 
 # 
 # dataset <- iris
-# x <- "Sepal.Length" 
+# x <- "Sepal.Length"
 # y <- "Petal.Width"
 # fill <- "Species"
 # color <- "Species"
@@ -207,11 +198,11 @@ combine_string <- function(libraries = "library(ggplot2)",
 # std_theme <- create_std_theme(theme = "bw")
 # custom_theme <- create_custom_theme(rm_legend = F)
 # labs <- create_labs(title = "example", color = "BLOMSTER for helved")
-# e_string <- combine_string(libraries, 
-#                            init_layer = init_layer, 
-#                            geoms = geoms, 
+# e_string <- combine_string(libraries,
+#                            init_layer = init_layer,
+#                            geoms = geoms,
 #                            labs = labs,
-#                            theme_std = std_theme, 
+#                            theme_std = std_theme,
 #                            theme_custom = custom_theme)
 # p <- eval(parse(text=e_string))
 # p
@@ -220,4 +211,5 @@ combine_string <- function(libraries = "library(ggplot2)",
 # 
 # cat(e_string)
 # head(df)
+
 
