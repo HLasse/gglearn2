@@ -64,6 +64,10 @@ create_geom <- function(geom, color=NULL, fill=NULL, shape=NULL, alpha=NULL){
     }
     return(res)
   }
+  geom = str_to_null(geom)
+  if (is.null(geom)){
+    return NULL
+  }
   
   h <- hash("dens" = "geom_density()",
             "hist" = "geom_histogram()",
@@ -98,6 +102,14 @@ add_layer <- function(e_string, geom){
 null_to_str <- function(str){
   if (is.null(str)){
     str <- ""
+  }
+  return(str)
+}
+
+
+str_to_null <- function(str){
+  if (str == "NULL"){
+    str <- NULL
   }
   return(str)
 }
@@ -171,14 +183,26 @@ combine_string <- function(libraries = "library(ggplot2)",
   geoms <- paste0("\t", geoms)
   e_string <- paste(libraries, init_layer, sep ="\n\n")
   for (geom in geoms){
-    e_string <- add_layer(e_string, geom)
+    if (! is.null(geom)){
+      e_string <- add_layer(e_string, geom)
+    }
   }
   e_string <- add_layer(e_string, labs)
   e_string <- add_layer(e_string, theme_std)
   e_string <- add_layer(e_string, theme_custom)
+  
+  # exception handling for qq
+  if (str_match(e_string, "geom_qq")[1, 1] == "geom_qq"){
+    var <- str_match(e_string, "x = (.*),")[, 2]
+    e_string <- str_replace(e_string, "x = .*\\)", 
+                            paste0("sample = ", var, ")"))
+  }
+  
   return(e_string)
 }
 
+init_layer <- create_init(x = x)
+combine_string(init_layer =init_layer, geoms = create_geom("line"))
 
 # 
 # 
