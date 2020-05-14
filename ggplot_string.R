@@ -64,7 +64,7 @@ create_geom <- function(geom, color=NULL, fill=NULL, shape=NULL, alpha=NULL){
     }
     return(res)
   }
-
+  
   h <- hash("dens" = "geom_density()",
             "hist" = "geom_histogram()",
             "qq" ="geom_qq()",
@@ -74,10 +74,10 @@ create_geom <- function(geom, color=NULL, fill=NULL, shape=NULL, alpha=NULL){
             "violin" = "geom_violin()",
             "box" = "geom_boxplot()",
             "smooth" = "geom_smooth()"
-            )
+  )
   geom_str = h[[geom]]
   if (is.null(geom_str)){stop(paste("The geom,", geom, "is not implemented"))}
-
+  
   geom_str <- geom_add_arg(geom_str, color, "color")
   geom_str <- geom_add_arg(geom_str, fill, "fill")
   geom_str <- geom_add_arg(geom_str, shape, "shape")
@@ -119,9 +119,9 @@ create_labs <- function(title=NULL,
                         color=NULL,
                         fill=NULL,
                         shape=NULL
-                        ){
+){
   title = null_to_str(title)
-
+  
   labs_str <- paste0("labs(title = ", add_quatations(title), ")")
   labs_str <- geom_add_arg(labs_str, add_quatations(subtitle), "subtitle")
   labs_str <- geom_add_arg(labs_str, add_quatations(caption), "caption")
@@ -167,7 +167,7 @@ combine_string <- function(libraries = "library(ggplot2)",
                            labs = NULL,
                            theme_std = NULL,
                            theme_custom = NULL
-                           ){
+){
   geoms <- paste0("\t", geoms)
   e_string <- paste(libraries, init_layer, sep ="\n\n")
   for (geom in geoms){
