@@ -38,7 +38,7 @@ geom_add_arg <- function(geom_str, arg, name){
 }
 
 
-create_geom <- function(geom, color, fill, shape, alpha){
+create_geom <- function(geom, color=NULL, fill=NULL, shape=NULL, alpha=NULL){
   h <- hash("dens" = "geom_density()",
             "hist" = "geom_histogram()",
             "qq" ="geom_qq()",
@@ -59,7 +59,11 @@ create_geom <- function(geom, color, fill, shape, alpha){
   return(geom_str)
 }
 
+
 add_layer <- function(e_string, geom){
+  if (is.null(geom)){
+    return(e_string)
+  }
   e_string <- paste0(e_string, " + ", "\n", geom)
   return(e_string)
 }
@@ -67,10 +71,10 @@ add_layer <- function(e_string, geom){
 combine_string <- function(libraries = "library(ggplot2)",
                            init_layer,
                            geoms,
-                           legends = ""
+                           legends = NULL
                            ){
   geoms <- paste0("\t", geoms)
-  e_string <- paste(libraries, init_layer, sep ="\n")
+  e_string <- paste(libraries, init_layer, sep ="\n\n")
   for (geom in geoms){
     e_string <- add_layer(e_string, geoms)
   }
@@ -92,8 +96,9 @@ shape <- "Species"
 
 libraries <- "library(ggplot2)"
 init_layer <- create_init(x = x, y = y, fill = fill, color = color, shape = shape)
-geoms <- c("geom_point()")
+geoms <- c(create_geom("scatter"))
 e_string <- combine_string(libraries, init_layer=init_layer, geoms=geoms)
 p <- eval(parse(text=e_string))
 p
+cat(e_string)
 head(df)
