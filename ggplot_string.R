@@ -38,7 +38,33 @@ geom_add_arg <- function(geom_str, arg, name){
 }
 
 
-create_geom <- function(geom, color, fill, shape, alpha){
+check_length <- function(x, len){
+  if (length(x) == len){
+    return(x)
+  } else if (length(x) == 1 | is.null(x)){
+    x <- rep(x, len)
+  } else {
+    stop("length of geoms is above 1, but the length of the remainder of the arguments does not match")
+  }
+}
+
+
+create_geom <- function(geom, color=NULL, fill=NULL, shape=NULL, alpha=NULL){
+  if (length(geom)>1){
+    n <- length(geom)
+    color <- check_length(color, n)
+    fill <- check_length(fill, n)
+    shape <- check_length(shape, n)
+    alpha <- check_length(alpha, n)
+    
+    res <- c()
+    for (i in 1:n){
+      geom_str <- create_geom(geom[i], color[i], fill[i], shape[i], alpha[i])
+      res = c(res, geom_str)
+    }
+    return(res)
+  }
+  
   h <- hash("dens" = "geom_density()",
             "hist" = "geom_histogram()",
             "qq" ="geom_qq()",
@@ -59,22 +85,97 @@ create_geom <- function(geom, color, fill, shape, alpha){
   return(geom_str)
 }
 
+
 add_layer <- function(e_string, geom){
+  if (is.null(geom)){
+    return(e_string)
+  }
   e_string <- paste0(e_string, " + ", "\n", geom)
   return(e_string)
 }
 
+
+null_to_str <- function(str){
+  if (is.null(str)){
+    str <- ""
+  }
+  return(str)
+}
+
+
+add_quatations <- function(str){
+  if (is.null(str)){
+    return(NULL)
+  }
+  str = paste0("'", str,"'")
+  return(str)
+}
+
+
+create_labs <- function(title=NULL, 
+                        subtitle=NULL,
+                        caption=NULL,
+                        tag=NULL, 
+                        color=NULL,
+                        fill=NULL,
+                        shape=NULL
+                        ){
+  title = null_to_str(title)
+
+  labs_str <- paste0("labs(title = ", add_quatations(title), ")")
+  labs_str <- geom_add_arg(labs_str, add_quatations(subtitle), "subtitle")
+  labs_str <- geom_add_arg(labs_str, add_quatations(caption), "caption")
+  labs_str <- geom_add_arg(labs_str, add_quatations(tag), "tag")
+  labs_str <- geom_add_arg(labs_str, add_quatations(color), "color")
+  labs_str <- geom_add_arg(labs_str, add_quatations(fill), "fill")
+  labs_str <- geom_add_arg(labs_str, add_quatations(shape), "shape")
+  return(labs_str)
+}
+
+
+create_std_theme <- function(theme){
+  h <- hash("gray" = "theme_gray()",
+            "bw" = "theme_bw()",
+            "light" = "theme_light()",
+            "dark" = "theme_dark()",
+            "minimal" = "theme_minimal()",
+            "classic" = "theme_classic()",
+            "void" = "theme_void()"
+  )
+  theme_str <- h[[theme]]
+  return(theme_str)
+}
+
+
+create_custom_theme <- function(rm_legend = F){
+  theme_str <- paste0("theme(legend.title = ", legend_title, ")")
+  
+  theme_str <- "theme()"
+  if (isTRUE(rm_legend)){
+    theme_str <- geom_add_arg(theme_str, name = 'legend.position', arg = '"none"')
+  }
+  if (theme_str == "theme()"){
+    return(NULL)
+  }
+  return(theme_str)
+}
+
+
 combine_string <- function(libraries = "library(ggplot2)",
                            init_layer,
                            geoms,
-                           legends = ""
+                           labs = NULL,
+                           theme_std = NULL,
+                           theme_custom = NULL
                            ){
   geoms <- paste0("\t", geoms)
-  e_string <- paste(libraries, init_layer, sep ="\n")
+  e_string <- paste(libraries, init_layer, sep ="\n\n")
   for (geom in geoms){
-    e_string <- add_layer(e_string, geoms)
+    e_string <- add_layer(e_string, geom)
   }
-  e_string <- add_layer(e_string, legends)
+  e_string <- add_layer(e_string, labs)
+  e_string <- add_layer(e_string, theme_std)
+  e_string <- add_layer(e_string, theme_custom)
   return(e_string)
 }
 
@@ -92,8 +193,21 @@ shape <- "Species"
 
 libraries <- "library(ggplot2)"
 init_layer <- create_init(x = x, y = y, fill = fill, color = color, shape = shape)
-geoms <- c("geom_point()")
-e_string <- combine_string(libraries, init_layer=init_layer, geoms=geoms)
+geoms <- c(create_geom("scatter"), create_geom("line"))
+
+std_theme <- create_std_theme(theme = "bw")
+custom_theme <- create_custom_theme(rm_legend = F)
+labs <- create_labs(title = "example", color = "BLOMSTER for helved")
+e_string <- combine_string(libraries, 
+                           init_layer = init_layer, 
+                           geoms = geoms, 
+                           labs = labs,
+                           theme_std = std_theme, 
+                           theme_custom = custom_theme)
 p <- eval(parse(text=e_string))
 p
+
+
+cat(e_string)
 head(df)
+
