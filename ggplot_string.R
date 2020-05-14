@@ -66,7 +66,7 @@ create_geom <- function(geom, color=NULL, fill=NULL, shape=NULL, alpha=NULL){
   }
   geom = str_to_null(geom)
   if (is.null(geom)){
-    return NULL
+    return (NULL)
   }
   
   h <- hash("dens" = "geom_density()",
