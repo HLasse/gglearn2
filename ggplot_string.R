@@ -108,6 +108,9 @@ null_to_str <- function(str){
 
 
 str_to_null <- function(str){
+  if (is.null(str)){
+    return(str)
+  }
   if (str == "NULL"){
     str <- NULL
   }
