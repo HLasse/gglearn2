@@ -66,7 +66,7 @@ create_geom <- function(geom, color=NULL, fill=NULL, shape=NULL, alpha=NULL){
   }
   geom = str_to_null(geom)
   if (is.null(geom)){
-    return (NULL)
+    return(NULL)
   }
   
   h <- hash("dens" = "geom_density()",
@@ -172,16 +172,27 @@ create_custom_theme <- function(rm_legend = F){
   return(theme_str)
 }
 
+create_facet <- function(by){
+  by <- str_to_null(by)
+  facet_str <- paste0("facet_wrap( ~ ", by, ")")
+  return(facet_str)
+}
+
 
 combine_string <- function(libraries = "library(ggplot2)",
                            init_layer,
                            geoms,
+                           facet = NULL,
                            labs = NULL,
                            theme_std = NULL,
                            theme_custom = NULL
 ){
   geoms <- paste0("\t", geoms)
   e_string <- paste(libraries, init_layer, sep ="\n\n")
+  
+  if (! is.null(facet)){
+    geoms <- c(geom, facet)
+  }
   for (geom in geoms){
     if (! is.null(geom)){
       e_string <- add_layer(e_string, geom)
@@ -192,8 +203,9 @@ combine_string <- function(libraries = "library(ggplot2)",
   e_string <- add_layer(e_string, theme_custom)
   
   # exception handling for qq
-  if (str_match(e_string, "geom_qq")[1, 1] == "geom_qq"){
-    var <- str_match(e_string, "x = (.*),")[, 2]
+  x <- str_match(e_string, "geom_qq")[1, 1]
+  if (! is.na(x) & x == "geom_qq"){
+    var <- str_match(e_string, "x = (.*)\\)")[, 2]
     e_string <- str_replace(e_string, "x = .*\\)", 
                             paste0("sample = ", var, ")"))
   }
@@ -201,8 +213,8 @@ combine_string <- function(libraries = "library(ggplot2)",
   return(e_string)
 }
 
-init_layer <- create_init(x = x)
-combine_string(init_layer =init_layer, geoms = create_geom("line"))
+# init_layer <- create_init(x = "x")
+# combine_string(init_layer =init_layer, geoms = create_geom("qq"))
 
 # 
 # 
