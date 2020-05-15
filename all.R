@@ -9,17 +9,19 @@ library(skimr)
 library(listviewer)
 library(knitr)
 library(kableExtra)
-#, options = list(columns = list(width = "100%"))
 
+##### STANDARDIZE OG SCALE
 
+#### FORKLAR GATHER
 
+#### i facet behold kun factor/fjern numeric
 gglearn <- function(dataset){
   
   source("helpers.R")
-
+  
   # Get named list of columns in dataset
   columns <- setNames(as.list(names(dataset)), names(dataset))
-
+  
   ui <- navbarPage("gglearn2", windowTitle = NULL, theme = "lumen",
                    # Tab 1: Dataframe and summary statistics
                    
@@ -69,7 +71,7 @@ gglearn <- function(dataset){
                               textAreaInput("code_1", "Code goes here", value = "CODEEE")
                               
                             )
-                    ),
+                   ),
                    tabPanel(title = "1 Variable", icon = icon("chart-area"),
                             # Exploring 1 variables
                             fluidPage(
@@ -104,19 +106,25 @@ gglearn <- function(dataset){
                               fluidRow(
                                 column(width = 8,
                                        plotOutput("plot_1_var")
-                                       ),
+                                ),
                                 column(width = 4,
-                                      
-                                         verbatimTextOutput("code_1_var"),
-                                        tags$head(tags$style("#code_1_var{color: #a2000d;
-                                 }"
+                                       tabsetPanel(type='pills', id = "tabset_1",
+                                                   tabPanel(title = strong("Code"), 
+                                                            value = "code",
+                                                            
+                                                            verbatimTextOutput("code_1_var"),
+                                                            tags$head(tags$style("#code_1_var{color: #a2000d; height: 300px;}"
+                                                            )
+                                                            )
+                                                   ),
+                                                   tabPanel(title = strong("Playground"),
+                                                            value = "playground",
+                                                            textAreaInput("playground_1", label = NULL, height = "300px"),
+                                                            actionButton("update_plot_1", "Update plot"))
                                        )
-                                       )
-                                       
                                 )
                               )
                             )
-
                    ),
                    tabPanel(title = "2 Variables", icon = icon("chart-line"),
                             fluidPage(
@@ -153,7 +161,7 @@ gglearn <- function(dataset){
                                                      "Bar" = "bar",
                                                      "Smooth" = "smooth")
                                        )
-
+                                       
                                 )
                               ),
                               fluidRow(
@@ -161,10 +169,19 @@ gglearn <- function(dataset){
                                        plotOutput("plot_2_var")
                                 ),
                                 column(width = 4,
-                                       verbatimTextOutput("code_2_var"),
-                                       tags$head(tags$style("#code_2_var{color: #a2000d;
-                                 }"
-                                       )
+                                       tabsetPanel(type='pills', id = "tabset_2",
+                                                   tabPanel(title = strong("Code"), 
+                                                            value = "code",
+                                                            
+                                                            verbatimTextOutput("code_2_var"),
+                                                            tags$head(tags$style("#code_2_var{color: #a2000d; height: 300px;}"
+                                                            )
+                                                            )
+                                                   ),
+                                                   tabPanel(title = strong("Playground"),
+                                                            value = "playground",
+                                                            textAreaInput("playground_2", label = NULL, height = "300px"),
+                                                            actionButton("update_plot_2", "Update plot"))
                                        )
                                 )
                               )
@@ -181,7 +198,7 @@ gglearn <- function(dataset){
                                 column(3,
                                        selectInput("group_plot", "Choose plot",
                                                    c("1 variable" = "1_var_plot",
-                                                     "2 varaibles" = "2_var_plot"))
+                                                     "2 variables" = "2_var_plot"))
                                 ),
                                 column(3,
                                        selectInput("group_color", "Color", c("None" = "NULL", columns))
@@ -192,7 +209,7 @@ gglearn <- function(dataset){
                                 ),
                                 column(3,
                                        selectInput("group_facet", "Facet", c("None" = "NULL", columns))
-
+                                       
                                 )
                               ),
                               fluidRow(
@@ -200,10 +217,19 @@ gglearn <- function(dataset){
                                        plotOutput("plot_3_var")
                                 ),
                                 column(width = 4,
-                                       verbatimTextOutput("code_3_var"),
-                                       tags$head(tags$style("#code_3_var{color: #a2000d;
-                                 }"
-                                       )
+                                       tabsetPanel(type='pills', id = "tabset_3",
+                                                   tabPanel(title = strong("Code"), 
+                                                            value = "code",
+                                                            
+                                                            verbatimTextOutput("code_3_var"),
+                                                            tags$head(tags$style("#code_3_var{color: #a2000d; height: 300px;}"
+                                                            )
+                                                            )
+                                                   ),
+                                                   tabPanel(title = strong("Playground"),
+                                                            value = "playground",
+                                                            textAreaInput("playground_3", label = NULL, height = "300px"),
+                                                            actionButton("update_plot_3", "Update plot"))
                                        )
                                 )
                               )
@@ -218,33 +244,6 @@ gglearn <- function(dataset){
                                        )
                                 ),
                                 column(3,
-                                       textInput("p_col", "Geom color", "steelblue")
-                                ),
-                                column(3,
-                                       sliderInput("p_alpha", "Geom opacity", 0, 1, 0.5, 0.2)
-                                ),
-                                br(),
-                                column(3, offset = 6,
-                                       textInput("p_shape", "Geom shape", "Your Title")
-                                ),
-                                column(3,
-                                       selectInput("p_legend", "Legend position", 
-                                                   c("Top" = "top",
-                                                     "Bottom" = "bottom",
-                                                     "Right" = "right",
-                                                     "Remove" = "none")
-                                                   )
-                                ),
-                                br(),
-                                column(3, offset = 6,
-                                       textInput("p_x_lab", "X label", "X-variable")
-                                ),
-                                column(3,
-                                       textInput("p_y_lab", "Y label", "Y-variable")
-                                       
-                                ),
-                                br(),
-                                column(3, offset = 6,
                                        textInput("p_title", "Title", "Your Title")
                                 ),
                                 column(3,
@@ -256,20 +255,55 @@ gglearn <- function(dataset){
                                                      "classic" = "classic",
                                                      "void" = "void",
                                                      "dark" = "dark")
-                                                   )
-                                )
-                              ),
-                              fluidRow(
-                                column(width = 8,
-                                       plotOutput("plot_4_var")
+                                       )
                                 ),
-                                column(width = 4,
-                                       verbatimTextOutput("code_4_var"),
-                                       tags$head(tags$style("#code_4_var{color: #a2000d;
-                                 }"
-                                       )
+                                br(),
+                                column(3, offset = 6,
+                                       textInput("p_x_lab", "X label", "X-variable")
+                                ),
+                                column(3,
+                                       textInput("p_y_lab", "Y label", "Y-variable")
+                                ),
+                                br(),
+                                column(3, offset = 6,
+                                       selectizeInput("p_col", "Geom color", c("NULL", colors()), multiple = F)
+                                ),
+                                column(3,
+                                       sliderInput("p_alpha", "Geom opacity", 0, 1, 1, 0.2)
+                                ),
+                                br(),
+                                column(3, offset = 6,
+                                       selectInput("p_shape", "Geom shape", shape_opts())
+                                ),
+                                column(3,
+                                       selectInput("p_legend", "Legend position", 
+                                                   c("Right" = "right",
+                                                     "Top" = "top",
+                                                     "Bottom" = "bottom",
+                                                     "Remove" = "none")
                                        )
                                 )
+                              )
+                            ),
+                            fluidRow(
+                              column(width = 8,
+                                     plotOutput("plot_4_var")
+                              ),
+                              column(width = 4,
+                                     tabsetPanel(type='pills', id = "tabset_4",
+                                                 tabPanel(title = strong("Code"), 
+                                                          value = "code",
+                                                          
+                                                          verbatimTextOutput("code_4_var"),
+                                                          tags$head(tags$style("#code_4_var{color: #a2000d; height: 300px;}"
+                                                          )
+                                                          )
+                                                 ),
+                                                 tabPanel(title = strong("Playground"),
+                                                          value = "playground",
+                                                          textAreaInput("playground_4", label = NULL, height = "300px"),
+                                                          actionButton("update_plot_4", "Update plot"))
+                                     )
                               )
                             )
                    ),
@@ -284,7 +318,7 @@ gglearn <- function(dataset){
   
   # textAreaInput
   
-  server <- function(input, output) { 
+  server <- function(input, output, session) { 
     source("ggplot_string.R")
     
     ######################### Setting reactive values
@@ -293,7 +327,15 @@ gglearn <- function(dataset){
               "group_plot", "group_color", "group_fill", "group_facet",
               "p_col", "p_alpha", "p_shape", "p_legend",
               "p_x_lab", "p_y_lab", "p_title", "p_theme")
+    
+    playground_vals <- c("show_playground_1", "show_playground_2", "show_playground_3", "show_playground_4")
+    
     values <- reactiveValues()
+    
+    for(play in playground_vals){
+      values[[play]] <- FALSE
+    }
+    
     for (var in vars){
       values[[var]] <- NULL
     }
@@ -304,7 +346,7 @@ gglearn <- function(dataset){
       })
     }
     lapply(vars, obs_up)
-  
+    
     ######################### OUTPUTS FOR TAB 1 - SUMMARY STATS
     output$skim_factor <- renderDT({
       dataset %>%
@@ -346,20 +388,40 @@ gglearn <- function(dataset){
     
     ################################## OUTPUT FOR TAB 2: 1 VARIABLE
     
+    
+    # Update code based on inputs
     observe({
       values$str_plot_1 <- {
         init_layer <- create_init(x = values$x_1)
         geoms <- create_geom(as.character(values$graph_1))
         final_str <- combine_string(init_layer = init_layer, geoms = geoms)}
     })
-
+    
+    # Check which tab is selected
+    observeEvent(input$tabset_1, {
+      updateTextAreaInput(session, "playground_1", value = values$str_plot_1)
+      values$show_playground_1 <- FALSE
+    })
+    
+    # Update plot if button is pressed
+    observeEvent(input$update_plot_1, {
+      values$show_playground_1 <- TRUE
+      values$playground_1 <- input$playground_1
+    })
+    
     output$code_1_var <- renderText({
       values$str_plot_1
     })
     
     output$plot_1_var <- renderPlot({
-      eval(parse(text = values$str_plot_1))
+      req(input$x_1)
+      if(isTRUE(values$show_playground_1)){
+        return(eval(parse(text = values$playground_1)))
+      } else {
+        return(eval(parse(text = values$str_plot_1)))
+      }
     })
+    
     ########################## OUTPUT TAB 2: 2 VARIABLES
     observe({
       values$str_plot_2 <- {
@@ -368,13 +430,28 @@ gglearn <- function(dataset){
         final_str <- combine_string(init_layer = init_layer, geoms = geoms)}
     })
     
+    observeEvent(input$tabset_2, {
+      updateTextAreaInput(session, "playground_2", value = values$str_plot_2)
+      values$show_playground_2 <- FALSE
+    })
+    
+    observeEvent(input$update_plot_2, {
+      values$show_playground_2 <- TRUE
+      values$playground_2 <- input$playground_2
+    })
     
     output$code_2_var <- renderText({
       values$str_plot_2
     })
     
+    
     output$plot_2_var <- renderPlot({
-      eval(parse(text = values$str_plot_2))
+      req(input$x_2)
+      if(isTRUE(values$show_playground_2)){
+        return(eval(parse(text = values$playground_2)))
+      } else {
+        return(eval(parse(text = values$str_plot_2)))
+      }
     })
     
     ######################33 OUTPUT TAB 3: GROUPINGS
@@ -391,23 +468,69 @@ gglearn <- function(dataset){
         facet <- create_facet(as.character(values$group_facet))
         final_str <- combine_string(init_layer = init_layer, geoms = geoms, facet = facet)}
     })
+    
     output$code_3_var <- renderText({
       values$str_plot_3
     })
     
-    output$plot_3_var <- renderPlot({
-      eval(parse(text = values$str_plot_3))
+    observeEvent(input$tabset_3, {
+      updateTextAreaInput(session, "playground_3", value = values$str_plot_3)
+      values$show_playground_3 <- FALSE
     })
     
-    output$code_4_var <- renderUI({
-      code("This is more code")
+    observeEvent(input$update_plot_3, {
+      values$show_playground_3 <- TRUE
+      values$playground_3 <- input$playground_3
+    })
+    
+    output$plot_3_var <- renderPlot({
+      req(input$group_plot)
+      if(isTRUE(values$show_playground_3)){
+        return(eval(parse(text = values$playground_3)))
+      } else {
+        return(eval(parse(text = values$str_plot_3)))
+      }
+    })
+    ############################# OUTPUT TAB 4:  MAKING IT PRETTY
+    observe({
+      values$str_plot_4 <- {
+        if(values$group_plot == "1_var_plot"){
+          init_layer <- create_init(x = values$x_1, color = values$group_color, fill = values$group_fill)
+          geoms <- create_geom(as.character(values$graph_1), color = values$p_col, shape = values$p_shape, alpha = values$p_alpha)
+        }
+        if(values$group_plot == "2_var_plot"){
+          init_layer <- create_init(x = values$x_2, y = values$y_2, color = values$group_color, fill = values$group_fill)
+          geoms <- create_geom(c(as.character(values$geom_2_1), as.character(values$geom_2_2)), color = c(values$p_col, "NULL"), shape = c(values$p_shape, "NULL"), alpha = c(values$p_alpha, "NULL"))
+        }
+        labs <- create_labs(title = values$p_title, x = values$p_x_lab, y = values$p_y_lab)
+        plot_theme <- create_std_theme(values$p_theme)
+        legend <- create_custom_theme(values$p_legend)
+        
+        facet <- create_facet(as.character(values$group_facet))
+        final_str <- combine_string(init_layer = init_layer, geoms = geoms, facet = facet, labs = labs, theme_std = plot_theme, theme_custom = legend)}
+    })
+    
+    output$code_4_var <- renderText({
+      values$str_plot_4
+    })
+    
+    observeEvent(input$tabset_4, {
+      updateTextAreaInput(session, "playground_4", value = values$str_plot_4)
+      values$show_playground_4 <- FALSE
+    })
+    
+    observeEvent(input$update_plot_4, {
+      values$show_playground_4 <- TRUE
+      values$playground_4 <- input$playground_4
     })
     
     output$plot_4_var <- renderPlot({
-      ggplot(dataset, aes(Petal.Length, Petal.Width, color = Species)) + 
-        geom_point() + 
-        labs(title = "A title") +
-        theme(legend.position = "top")
+      req(input$p_col)
+      if(isTRUE(values$show_playground_4)){
+        return(eval(parse(text = values$playground_4)))
+      } else {
+        return(eval(parse(text = values$str_plot_4)))
+      }
     })
     
     
