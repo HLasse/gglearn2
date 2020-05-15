@@ -91,7 +91,7 @@ create_geom <- function(geom, color=NULL, fill=NULL, shape=NULL, alpha=NULL){
   geom_str = h[[geom]]
   if (is.null(geom_str)){stop(paste("The geom,", geom, "is not implemented"))}
   
-  geom_str <- geom_add_arg(geom_str, color, "color")
+  geom_str <- geom_add_arg(geom_str, add_quatations(color), "color")
   geom_str <- geom_add_arg(geom_str, fill, "fill")
   geom_str <- geom_add_arg(geom_str, shape, "shape")
   geom_str <- geom_add_arg(geom_str, alpha, "alpha")
@@ -142,7 +142,9 @@ create_labs <- function(title=NULL,
                         tag=NULL, 
                         color=NULL,
                         fill=NULL,
-                        shape=NULL
+                        shape=NULL,
+                        x = NULL,
+                        y = NULL
 ){
   title = null_to_str(title)
   
@@ -153,6 +155,8 @@ create_labs <- function(title=NULL,
   labs_str <- geom_add_arg(labs_str, add_quatations(color), "color")
   labs_str <- geom_add_arg(labs_str, add_quatations(fill), "fill")
   labs_str <- geom_add_arg(labs_str, add_quatations(shape), "shape")
+  labs_str <- geom_add_arg(labs_str, add_quatations(x), "x")
+  labs_str <- geom_add_arg(labs_str, add_quatations(y), "y")
   return(labs_str)
 }
 
@@ -171,13 +175,10 @@ create_std_theme <- function(theme){
 }
 
 
-create_custom_theme <- function(rm_legend = F){
-  theme_str <- paste0("theme(legend.title = ", legend_title, ")")
-  
+create_custom_theme <- function(rm_legend){
+
   theme_str <- "theme()"
-  if (isTRUE(rm_legend)){
-    theme_str <- geom_add_arg(theme_str, name = 'legend.position', arg = '"none"')
-  }
+  theme_str <- geom_add_arg(theme_str, name = 'legend.position', arg = add_quatations(rm_legend))
   if (theme_str == "theme()"){
     return(NULL)
   }
