@@ -115,7 +115,8 @@ gglearn <- function(dataset){
                                                             verbatimTextOutput("code_1_var"),
                                                             tags$head(tags$style("#code_1_var{color: #a2000d; height: 300px;}"
                                                             )
-                                                            )
+                                                            ),
+                                                            actionButton("insert_code_1", "Insert code in script")
                                                    ),
                                                    tabPanel(title = strong("Playground"),
                                                             value = "playground",
@@ -422,6 +423,19 @@ gglearn <- function(dataset){
       }
     })
     
+    ## Insert code
+    insert_code <- function(button, code){
+      observeEvent(input[[button]], {
+        context <- rstudioapi::getSourceEditorContext()
+        rstudioapi::insertText(text = paste0("\n", values[[code]], "\n"), id = context$id)
+      })
+    }
+    insert_code("insert_code_1", "str_plot_1")
+
+    
+    
+    
+    
     ########################## OUTPUT TAB 2: 2 VARIABLES
     observe({
       values$str_plot_2 <- {
@@ -568,3 +582,28 @@ launch_app(datas = dataset)
 #   shinyApp(ui, server)
 # }
 # launch_2(iris)
+
+
+observeEvent(input$insert_code, {
+  context <- rstudioapi::getSourceEditorContext()
+  code <- ggplot_rv$code
+  code <- stri_replace_all(str = code, replacement = "+\n", fixed = "+")
+  if (!is.null(output_filter$code$expr)) {
+    code_dplyr <- deparse(output_filter$code$dplyr, width.cutoff = 80L)
+    code_dplyr <- paste(code_dplyr, collapse = "\n")
+    nm_dat <- data_name()
+    code_dplyr <- stri_replace_all(str = code_dplyr, replacement = "%>%\n", fixed = "%>%")
+    code <- stri_replace_all(str = code, replacement = " ggplot()", fixed = sprintf("ggplot(%s)", nm_dat))
+    code <- paste(code_dplyr, code, sep = " %>%\n")
+    if (input$insert_code == 1) {
+      code <- paste("library(dplyr)\nlibrary(ggplot2)", code, sep = "\n\n")
+    }
+  } else {
+    if (input$insert_code == 1) {
+      code <- paste("library(ggplot2)", code, sep = "\n\n")
+    }
+  }
+  rstudioapi::insertText(text = paste0("\n", code, "\n"), id = context$id)
+})
+
+
