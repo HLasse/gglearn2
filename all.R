@@ -9,10 +9,14 @@ library(skimr)
 library(listviewer)
 library(knitr)
 library(kableExtra)
-
+library(shinyAce)
 ##### STANDARDIZE OG SCALE
 
 #### FORKLAR GATHER
+
+## check shinyWidgets::panel, dropdown, spectrumInput
+## shinyFeedback
+## shinyAce (tjek https://github.com/cardiomoon/ggplotAssist/blob/master/R/textFunction.R hvis issues)
 
 #### i facet behold kun factor/fjern numeric
 gglearn <- function(dataset){
@@ -108,21 +112,8 @@ gglearn <- function(dataset){
                                        plotOutput("plot_1_var")
                                 ),
                                 column(width = 4,
-                                       tabsetPanel(type='pills', id = "tabset_1",
-                                                   tabPanel(title = strong("Code"), 
-                                                            value = "code",
-                                                            
-                                                            verbatimTextOutput("code_1_var"),
-                                                            tags$head(tags$style("#code_1_var{color: #a2000d; height: 300px;}"
-                                                            )
-                                                            ),
-                                                            actionButton("insert_code_1", "Insert code in script")
-                                                   ),
-                                                   tabPanel(title = strong("Playground"),
-                                                            value = "playground",
-                                                            textAreaInput("playground_1", label = NULL, height = "300px"),
-                                                            actionButton("update_plot_1", "Update plot"))
-                                       )
+                                       aceEditor("code_1_ace", "", wordWrap = T, theme = tolower(rstudioapi::getThemeInfo()$editor), mode = "r"),
+                                       actionButton("insert_code_1", "Insert code in script")
                                 )
                               )
                             )
@@ -170,20 +161,8 @@ gglearn <- function(dataset){
                                        plotOutput("plot_2_var")
                                 ),
                                 column(width = 4,
-                                       tabsetPanel(type='pills', id = "tabset_2",
-                                                   tabPanel(title = strong("Code"), 
-                                                            value = "code",
-                                                            
-                                                            verbatimTextOutput("code_2_var"),
-                                                            tags$head(tags$style("#code_2_var{color: #a2000d; height: 300px;}"
-                                                            )
-                                                            )
-                                                   ),
-                                                   tabPanel(title = strong("Playground"),
-                                                            value = "playground",
-                                                            textAreaInput("playground_2", label = NULL, height = "300px"),
-                                                            actionButton("update_plot_2", "Update plot"))
-                                       )
+                                       aceEditor("code_2_ace", "", wordWrap = T, theme = tolower(rstudioapi::getThemeInfo()$editor), mode = "r"),
+                                       actionButton("insert_code_2", "Insert code in script")
                                 )
                               )
                             )
@@ -218,20 +197,8 @@ gglearn <- function(dataset){
                                        plotOutput("plot_3_var")
                                 ),
                                 column(width = 4,
-                                       tabsetPanel(type='pills', id = "tabset_3",
-                                                   tabPanel(title = strong("Code"), 
-                                                            value = "code",
-                                                            
-                                                            verbatimTextOutput("code_3_var"),
-                                                            tags$head(tags$style("#code_3_var{color: #a2000d; height: 300px;}"
-                                                            )
-                                                            )
-                                                   ),
-                                                   tabPanel(title = strong("Playground"),
-                                                            value = "playground",
-                                                            textAreaInput("playground_3", label = NULL, height = "300px"),
-                                                            actionButton("update_plot_3", "Update plot"))
-                                       )
+                                       aceEditor("code_3_ace", "", wordWrap = T, theme = tolower(rstudioapi::getThemeInfo()$editor), mode = "r"),
+                                       actionButton("insert_code_3", "Insert code in script")
                                 )
                               )
                             )
@@ -291,20 +258,8 @@ gglearn <- function(dataset){
                                      plotOutput("plot_4_var")
                               ),
                               column(width = 4,
-                                     tabsetPanel(type='pills', id = "tabset_4",
-                                                 tabPanel(title = strong("Code"), 
-                                                          value = "code",
-                                                          
-                                                          verbatimTextOutput("code_4_var"),
-                                                          tags$head(tags$style("#code_4_var{color: #a2000d; height: 300px;}"
-                                                          )
-                                                          )
-                                                 ),
-                                                 tabPanel(title = strong("Playground"),
-                                                          value = "playground",
-                                                          textAreaInput("playground_4", label = NULL, height = "300px"),
-                                                          actionButton("update_plot_4", "Update plot"))
-                                     )
+                                     aceEditor("code_4_ace", "", wordWrap = T, theme = tolower(rstudioapi::getThemeInfo()$editor), mode = "r"),
+                                     actionButton("insert_code_4", "Insert code in script")
                               )
                             )
                    ),
@@ -398,29 +353,18 @@ gglearn <- function(dataset){
         final_str <- combine_string(init_layer = init_layer, geoms = geoms)}
     })
     
-    # Check which tab is selected
-    observeEvent(input$tabset_1, {
-      updateTextAreaInput(session, "playground_1", value = values$str_plot_1)
-      values$show_playground_1 <- FALSE
+    # Update code block based on selectInput
+    observe({
+      updateAceEditor(session, "code_1_ace", values$str_plot_1)
     })
     
-    # Update plot if button is pressed
-    observeEvent(input$update_plot_1, {
-      values$show_playground_1 <- TRUE
-      values$playground_1 <- input$playground_1
-    })
-    
-    output$code_1_var <- renderText({
-      values$str_plot_1
+    # Update plot code after input
+    observeEvent(input$code_1_ace, {
+      values$code_1_ace <- input$code_1_ace
     })
     
     output$plot_1_var <- renderPlot({
-      req(input$x_1)
-      if(isTRUE(values$show_playground_1)){
-        return(eval(parse(text = values$playground_1)))
-      } else {
-        return(eval(parse(text = values$str_plot_1)))
-      }
+      return(eval(parse(text = values$code_1_ace)))
     })
     
     ## Insert code
@@ -430,7 +374,7 @@ gglearn <- function(dataset){
         rstudioapi::insertText(text = paste0("\n", values[[code]], "\n"), id = context$id)
       })
     }
-    insert_code("insert_code_1", "str_plot_1")
+    insert_code("insert_code_1", "code_1_ace")
 
     
     
@@ -444,29 +388,21 @@ gglearn <- function(dataset){
         final_str <- combine_string(init_layer = init_layer, geoms = geoms)}
     })
     
-    observeEvent(input$tabset_2, {
-      updateTextAreaInput(session, "playground_2", value = values$str_plot_2)
-      values$show_playground_2 <- FALSE
+    # Update code block based on selectInput
+    observe({
+      updateAceEditor(session, "code_2_ace", values$str_plot_2)
     })
     
-    observeEvent(input$update_plot_2, {
-      values$show_playground_2 <- TRUE
-      values$playground_2 <- input$playground_2
+    # Update plot code after input
+    observeEvent(input$code_2_ace, {
+      values$code_2_ace <- input$code_2_ace
     })
-    
-    output$code_2_var <- renderText({
-      values$str_plot_2
-    })
-    
     
     output$plot_2_var <- renderPlot({
-      req(input$x_2)
-      if(isTRUE(values$show_playground_2)){
-        return(eval(parse(text = values$playground_2)))
-      } else {
-        return(eval(parse(text = values$str_plot_2)))
-      }
+      return(eval(parse(text = values$code_2_ace)))
     })
+    insert_code("insert_code_2", "code_2_ace")
+    
     
     ######################33 OUTPUT TAB 3: GROUPINGS
     observe({
@@ -483,28 +419,23 @@ gglearn <- function(dataset){
         final_str <- combine_string(init_layer = init_layer, geoms = geoms, facet = facet)}
     })
     
-    output$code_3_var <- renderText({
-      values$str_plot_3
+    # Update code block based on selectInput
+    observe({
+      updateAceEditor(session, "code_3_ace", values$str_plot_3)
     })
     
-    observeEvent(input$tabset_3, {
-      updateTextAreaInput(session, "playground_3", value = values$str_plot_3)
-      values$show_playground_3 <- FALSE
-    })
-    
-    observeEvent(input$update_plot_3, {
-      values$show_playground_3 <- TRUE
-      values$playground_3 <- input$playground_3
+    # Update plot code after input
+    observeEvent(input$code_3_ace, {
+      values$code_3_ace <- input$code_3_ace
     })
     
     output$plot_3_var <- renderPlot({
-      req(input$group_plot)
-      if(isTRUE(values$show_playground_3)){
-        return(eval(parse(text = values$playground_3)))
-      } else {
-        return(eval(parse(text = values$str_plot_3)))
-      }
+      return(eval(parse(text = values$code_3_ace)))
     })
+    
+    insert_code("insert_code_3", "code_3_ace")
+    
+    
     ############################# OUTPUT TAB 4:  MAKING IT PRETTY
     observe({
       values$str_plot_4 <- {
@@ -524,29 +455,21 @@ gglearn <- function(dataset){
         final_str <- combine_string(init_layer = init_layer, geoms = geoms, facet = facet, labs = labs, theme_std = plot_theme, theme_custom = legend)}
     })
     
-    output$code_4_var <- renderText({
-      values$str_plot_4
+    # Update code block based on selectInput
+    observe({
+      updateAceEditor(session, "code_4_ace", values$str_plot_4)
     })
     
-    observeEvent(input$tabset_4, {
-      updateTextAreaInput(session, "playground_4", value = values$str_plot_4)
-      values$show_playground_4 <- FALSE
-    })
-    
-    observeEvent(input$update_plot_4, {
-      values$show_playground_4 <- TRUE
-      values$playground_4 <- input$playground_4
+    # Update plot code after input
+    observeEvent(input$code_4_ace, {
+      values$code_4_ace <- input$code_4_ace
     })
     
     output$plot_4_var <- renderPlot({
-      req(input$p_col)
-      if(isTRUE(values$show_playground_4)){
-        return(eval(parse(text = values$playground_4)))
-      } else {
-        return(eval(parse(text = values$str_plot_4)))
-      }
+      return(eval(parse(text = values$code_4_ace)))
     })
     
+    insert_code("insert_code_4", "code_4_ace")
     
   }
   
@@ -555,6 +478,8 @@ gglearn <- function(dataset){
 
 
 gglearn(dataset = iris)
+
+
 
 launch_app <- function(datas, ...) {
  # file_path <- system.file("myapp.R", package = "mypackage")
