@@ -10,13 +10,19 @@ library(listviewer)
 library(knitr)
 library(kableExtra)
 library(shinyAce)
+library(shinyWidgets)
+library(scales)
+library(shinyFeedback)
 ##### STANDARDIZE OG SCALE
 
 #### FORKLAR GATHER
 
 ## check shinyWidgets::panel, dropdown, spectrumInput
 ## shinyFeedback
-## shinyAce (tjek https://github.com/cardiomoon/ggplotAssist/blob/master/R/textFunction.R hvis issues)
+
+## Graph selector? https://infogram.com/page/choose-the-right-chart-data-visualization
+
+## choose plot toggle knap
 
 #### i facet behold kun factor/fjern numeric
 gglearn <- function(dataset){
@@ -27,9 +33,11 @@ gglearn <- function(dataset){
   columns <- setNames(as.list(names(dataset)), names(dataset))
   
   ui <- navbarPage("gglearn2", windowTitle = NULL, theme = "lumen",
-                   # Tab 1: Dataframe and summary statistics
+                   # Initialize shinyfeedback
                    
+                   # Tab 1: Dataframe and summary statistics
                    tabPanel(title = "Introduction", icon = icon("stats", lib = "glyphicon"),
+                            useShinyFeedback(),
                             fluidPage(
                               fluidRow(
                                 column(width = 6,
@@ -84,28 +92,70 @@ gglearn <- function(dataset){
                                        wellPanel(
                                          "This is help text")
                                 ),
-                                column(width = 3,
-                                       selectInput("graph_1", "Graph Type",
-                                                   c("Density" = "dens",
-                                                     "Histogram" = "hist",
-                                                     "QQ Plot" = "qq"))
-                                ),
-                                column(width = 3,
-                                       varSelectInput("x_1", "Variable", dataset)
+                                column(width = 6,
+                                       tabsetPanel(type = "tabs",
+                                                   tabPanel("Layout",
+                                                            column(width = 6,
+                                                                   selectInput("graph_1", "Graph Type",
+                                                                               c("Density" = "dens",
+                                                                                 "Histogram" = "hist",
+                                                                                 "QQ Plot" = "qq"))
+                                                            ),
+                                                            column(width = 6,
+                                                                   varSelectInput("x_1", "Variable", dataset)
+                                                            ),
+                                                            
+                                                            column(width = 6,
+                                                                   selectInput("trans_1", "Transformation",
+                                                                               c("None" = "none",
+                                                                                 "Natural Logarithm" = "ln",
+                                                                                 "Inverse" = "inverse",
+                                                                                 "Others?" = "..."))
+                                                            ),
+                                                            column(width = 6,
+                                                                   selectInput("overlay_norm", "Overlay Normal Dist.",
+                                                                               c("No" = "none",
+                                                                                 "Yes" = "yes")
+                                                                   )
+                                                            ),
+                                                            icon = icon("chart-area")),
+                                                   tabPanel("Styling",
+                                                            column(6,
+                                                                   textInput("p_1_x_lab", "X label", "X-variable")
+                                                            ),
+                                                            column(6,
+                                                                   textInput("p_1_title", "Title", "Your Title")
+                                                            ),
+                                                            column(6,
+                                                                   selectInput("p_theme", "Theme", 
+                                                                               c("Default (gray)" = "gray",
+                                                                                 "light" = "light",
+                                                                                 "bw" = "bw",
+                                                                                 "minimal" = "minimal",
+                                                                                 "classic" = "classic",
+                                                                                 "void" = "void",
+                                                                                 "dark" = "dark")
+                                                                   )
+                                                            ),
+                                                            column(6,
+                                                                   spectrumInput(
+                                                                     inputId = "p_1_fill",
+                                                                     label = "Fill color",
+                                                                     choices = list(
+                                                                       #list('black', 'white', 'blanchedalmond', 'steelblue', 'forestgreen', "firebrick"),
+                                                                       list("steelblue", "forestgreen", "#C93312", "#DC863B", "#E1AF00" , "slateblue4"),
+                                                                       as.list(brewer_pal(palette = "Blues")(6)),
+                                                                       as.list(brewer_pal(palette = "Greens")(6)),
+                                                                       as.list(brewer_pal(palette = "Spectral")(6)),
+                                                                       as.list(brewer_pal(palette = "Dark2")(6))
+                                                                     ),
+                                                                     options = list(`toggle-palette-more-text` = "Show palette",
+                                                                                    `toggle-palette-less-text` = "Hide palette")
+                                                                   )
+                                                            ),
+                                                            icon = icon("palette"))
+                                       )
                                 )
-                              ),
-                              fluidRow(
-                                column(width = 3, offset = 6,
-                                       selectInput("trans_1", "Transformation",
-                                                   c("None" = "none",
-                                                     "Natural Logarithm" = "ln",
-                                                     "Inverse" = "inverse",
-                                                     "Others?" = "..."))
-                                ),
-                                column(width = 3,
-                                       selectInput("overlay_norm", "Overlay Normal Dist.",
-                                                   c("No" = "none",
-                                                     "Yes" = "yes")))
                               ),
                               fluidRow(
                                 column(width = 8,
@@ -344,6 +394,11 @@ gglearn <- function(dataset){
     
     ################################## OUTPUT FOR TAB 2: 1 VARIABLE
     
+    # Set warning if variable not numeric
+    observeEvent(input$x_1, {
+      feedbackWarning("x_1", !is.numeric(dataset[[input$x_1]]), "The variable should be numeric")
+    })
+    
     
     # Update code based on inputs
     observe({
@@ -375,7 +430,7 @@ gglearn <- function(dataset){
       })
     }
     insert_code("insert_code_1", "code_1_ace")
-
+    
     
     
     
@@ -481,54 +536,6 @@ gglearn(dataset = iris)
 
 
 
-launch_app <- function(datas, ...) {
- # file_path <- system.file("myapp.R", package = "mypackage")
-  if (!nzchar("app.R")) stop("Shiny app not found")
-  ui <- server <- NULL # avoid NOTE about undefined globals
-  source("app.R", local = TRUE)
-  server_env <- environment(server)
 
-  # Here you add any variables that your server can find
-  server_env$dataset <- datas
-
-  app <- shiny::shinyApp(ui, server)
-  shiny::runApp(app, ...)
-}
-
-launch_app(datas = dataset)
-
-# 
-# launch_app(datas = iris)
-# 
-# launch_2 <- function(datas) {
-#   ui <- server <- NULL
-#   source("app.R", local = TRUE)
-#   dataset = datas
-#   shinyApp(ui, server)
-# }
-# launch_2(iris)
-
-
-observeEvent(input$insert_code, {
-  context <- rstudioapi::getSourceEditorContext()
-  code <- ggplot_rv$code
-  code <- stri_replace_all(str = code, replacement = "+\n", fixed = "+")
-  if (!is.null(output_filter$code$expr)) {
-    code_dplyr <- deparse(output_filter$code$dplyr, width.cutoff = 80L)
-    code_dplyr <- paste(code_dplyr, collapse = "\n")
-    nm_dat <- data_name()
-    code_dplyr <- stri_replace_all(str = code_dplyr, replacement = "%>%\n", fixed = "%>%")
-    code <- stri_replace_all(str = code, replacement = " ggplot()", fixed = sprintf("ggplot(%s)", nm_dat))
-    code <- paste(code_dplyr, code, sep = " %>%\n")
-    if (input$insert_code == 1) {
-      code <- paste("library(dplyr)\nlibrary(ggplot2)", code, sep = "\n\n")
-    }
-  } else {
-    if (input$insert_code == 1) {
-      code <- paste("library(ggplot2)", code, sep = "\n\n")
-    }
-  }
-  rstudioapi::insertText(text = paste0("\n", code, "\n"), id = context$id)
-})
 
 
