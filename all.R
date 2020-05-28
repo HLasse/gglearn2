@@ -22,7 +22,9 @@ library(shinyFeedback)
 # https://datavizcatalogue.com/search.html
 
 
-## Graph selector? https://infogram.com/page/choose-the-right-chart-data-visualization
+### Tranformations: scale, log, 1/x
+### Palletes
+## Coord flip
 
 ## choose plot toggle knap
 
@@ -99,8 +101,8 @@ gglearn <- function(dataset){
                                          "This is help text")
                                 ),
                                 column(width = 6,
-                                       tabsetPanel(type = "tabs",
-                                                   tabPanel("Layout",
+                                       tabsetPanel(type = "tabs", id = "tab_1_var",
+                                                   tabPanel("Layout", value = "l",
                                                             column(width = 6,
                                                                    selectInput("graph_1", "Graph Type",
                                                                                c("Density" = "dens",
@@ -125,12 +127,12 @@ gglearn <- function(dataset){
                                                                    )
                                                             ),
                                                             icon = icon("chart-area")),
-                                                   tabPanel("Styling",
-                                                            column(6,
-                                                                   textInput("p_1_x_lab", "X label", "X")
-                                                            ),
+                                                   tabPanel("Styling", value = "s",
                                                             column(6,
                                                                    textInput("p_1_title", "Title", "Your Title")
+                                                            ),
+                                                            column(6,
+                                                                   textInput("p_1_x_lab", "X label", "X")
                                                             ),
                                                             column(6,
                                                                    selectInput("p_1_theme", "Theme", 
@@ -148,7 +150,6 @@ gglearn <- function(dataset){
                                                                      inputId = "p_1_fill",
                                                                      label = "Fill color",
                                                                      choices = list(
-                                                                       #list('black', 'white', 'blanchedalmond', 'steelblue', 'forestgreen', "firebrick"),
                                                                        list("steelblue", "forestgreen", "#C93312", "#DC863B", "#E1AF00" , "slateblue4"),
                                                                        as.list(brewer_pal(palette = "Blues")(6)),
                                                                        as.list(brewer_pal(palette = "Greens")(6)),
@@ -187,8 +188,8 @@ gglearn <- function(dataset){
                                        )
                                 ),
                                 column(6, 
-                                       tabsetPanel(type = "tabs",
-                                                   tabPanel("Layout", 
+                                       tabsetPanel(type = "tabs", id = "tab_2_var",
+                                                   tabPanel("Layout", value = "l",
                                                             column(6,
                                                                    varSelectInput("x_2", "X", dataset)
                                                             ),
@@ -220,7 +221,7 @@ gglearn <- function(dataset){
                                                             ),
                                                             icon = icon("chart-line")
                                                    ),
-                                                   tabPanel("Styling", 
+                                                   tabPanel("Styling", value = "s",
                                                             column(6,
                                                                    textInput("p_2_x_lab", "X label", "X")
                                                             ),
@@ -247,7 +248,7 @@ gglearn <- function(dataset){
                                                             ),
                                                             
                                                             icon = icon("palette")
-                                                   )
+                                                   ) 
                                        )
                                 )
                               ),
@@ -275,8 +276,8 @@ gglearn <- function(dataset){
                                        )
                                 ),
                                 column(6,
-                                       tabsetPanel(type = "tabs",
-                                                   tabPanel("Layout", 
+                                       tabsetPanel(type = "tabs", id = "tab_group",
+                                                   tabPanel("Layout", value = "l",
                                                             column(6,
                                                                    selectInput("group_plot", "Choose plot",
                                                                                c("1 variable" = "1_var_plot",
@@ -294,7 +295,7 @@ gglearn <- function(dataset){
                                                                    
                                                             ), icon = icon("group")
                                                    ),
-                                                   tabPanel("Styling", 
+                                                   tabPanel("Styling", value = "s",
                                                             # PALETTE, OPACITY, COORD FLIP, LEGEND POSITION
                                                             column(6,
                                                                    selectizeInput("group_palette", "Palette", choices = list(
@@ -319,7 +320,7 @@ gglearn <- function(dataset){
                                                                                  "Remove" = "none")
                                                                    )
                                                             ),
-                                                            br(),
+                                                            br(), 
                                                             column(6,
                                                                    sliderInput("group_alpha", "Geom 1 opacity", 0, 1, 1, 0.2)
                                                             ),
@@ -418,17 +419,22 @@ gglearn <- function(dataset){
     
     ######################### Setting reactive values
     vars <- c("x_1", "graph_1", "trans_1", "overlay_norm",
+              "p_1_x_lab", "p_1_title", "p_1_fill", "p_1_theme",
+              # 2 vars
               "x_2", "y_2", "geom_2_1", "geom_2_2",
+              "p_2_x_lab", "p_2_y_lab", "p_2_shape", "p_2_color",
+              # grouping
               "group_plot", "group_color", "group_fill", "group_facet",
+              "group_alpha", "group_coord_flip", "group_palette", "group_legend",
               "p_col", "p_alpha", "p_shape", "p_legend",
               "p_x_lab", "p_y_lab", "p_title", "p_theme")
     
-    playground_vals <- c("show_playground_1", "show_playground_2", "show_playground_3", "show_playground_4")
+    show_styling_vars <- c("tab_1_var", "tab_2_var", "tab_group")
     
     values <- reactiveValues()
     
-    for(play in playground_vals){
-      values[[play]] <- FALSE
+    for(var in show_styling_vars){
+      values[[var]] <- FALSE
     }
     
     for (var in vars){
@@ -485,18 +491,41 @@ gglearn <- function(dataset){
     
     # Set warning if variable not numeric
     observeEvent(input$x_1, {
-      feedbackWarning("x_1", !is.numeric(dataset[[input$x_1]]), "The variable should be numeric")
+      feedbackWarning("x_1", !is.numeric(dataset[[input$x_1]]), "Variables should be numeric for this type of plot")
     })
     
+    # Small helper (move?)
+    show_styling <- function(tab){
+      if(input[[tab]] == "s"){
+        values[[tab]] <- TRUE
+      }
+    }
     
-    #p_1_x_lab p_1_title p_1_fill p_1_themem
+    # Add styling if tab is clicked
+    observeEvent(input$tab_1_var, {show_styling("tab_1_var")})
+    
     # Update code based on inputs
     observe({
-      values$str_plot_1 <- {
-        init_layer <- create_init(x = values$x_1)
-        geoms <- create_geom(as.character(values$graph_1))
-        final_str <- combine_string(init_layer = init_layer, geoms = geoms)}
+      if (isTRUE(values$tab_1_var)) {
+        values$str_plot_1 <- {
+          init_layer <- create_init(x = values$x_1)
+          geoms <- create_geom(as.character(values$graph_1),
+                               fill = as.character(values$p_1_fill))
+          labs <- create_labs(title = values$p_1_title,
+                              x = values$p_1_x_lab)
+          theme <- create_std_theme(values$p_1_theme)
+          
+          final_str <- combine_string(init_layer = init_layer, geoms = geoms, labs = labs, theme_std = theme)}
+      }
+      else {
+        values$str_plot_1 <- {
+          init_layer <- create_init(x = values$x_1)
+          geoms <- create_geom(as.character(values$graph_1))
+          final_str <- combine_string(init_layer = init_layer, geoms = geoms)
+        }
+      }
     })
+    
     
     # Update code block based on selectInput
     observe({
@@ -523,14 +552,40 @@ gglearn <- function(dataset){
     
     
     
-    
-    
     ########################## OUTPUT TAB 2: 2 VARIABLES
+    
+    observeEvent(input$tab_2_var, {show_styling("tab_2_var")})
+    
+    ## Warning if violin or boxplot with non-factor x-variable
+    observe( {
+      feedbackWarning("geom_2_1", input$geom_2_1 %in% c("violin", "box") & is.numeric(dataset[[input$x_2]]), 
+                      "The X variable should be numeric for this type of plot")
+    })
+    
+    observe( {
+      feedbackWarning("geom_2_2", input$geom_2_2 %in% c("violin", "box") & is.numeric(dataset[[input$x_2]]), 
+                      "The X variable should be numeric for this type of plot")
+    })
+    
+    
     observe({
-      values$str_plot_2 <- {
-        init_layer <- create_init(x = values$x_2, y = values$y_2)
-        geoms <- create_geom(c(as.character(values$geom_2_1), as.character(values$geom_2_2)))
-        final_str <- combine_string(init_layer = init_layer, geoms = geoms)}
+      if (isTRUE(values$tab_2_var)){
+        values$str_plot_2 <- {
+          init_layer <- create_init(x = values$x_2, y = values$y_2)
+          geoms <- create_geom(c(as.character(values$geom_2_1), as.character(values$geom_2_2)),
+                               shape = c(values$p_2_shape, "NULL"),
+                               color = c("NULL", values$p_2_color)
+          )
+          labs <- create_labs(x = values$p_2_x_lab, y = values$p_2_y_lab)
+          final_str <- combine_string(init_layer = init_layer, geoms = geoms, labs = labs)}
+      }
+      else {
+        values$str_plot_2 <- {
+          init_layer <- create_init(x = values$x_2, y = values$y_2)
+          geoms <- create_geom(c(as.character(values$geom_2_1), as.character(values$geom_2_2)))
+          final_str <- combine_string(init_layer = init_layer, geoms = geoms)
+        }
+      }
     })
     
     # Update code block based on selectInput
@@ -550,18 +605,37 @@ gglearn <- function(dataset){
     
     
     ######################33 OUTPUT TAB 3: GROUPINGS
+    
+    # "group_palette", "group_legend", "group_alpha", "group_coord_flip"
+    observeEvent(input$tab_group, {show_styling("tab_group")})
+    
+    # update plot
     observe({
       values$str_plot_3 <- {
         if(values$group_plot == "1_var_plot"){
           init_layer <- create_init(x = values$x_1, color = values$group_color, fill = values$group_fill)
-          geoms <- create_geom(as.character(values$graph_1))
+          geoms <- if_else(!isTRUE(values$tab_group),
+                           create_geom(as.character(values$graph_1)),
+                           create_geom(as.character(values$graph_1), alpha = values$group_alpha)
+          )
         }
         if(values$group_plot == "2_var_plot"){
           init_layer <- create_init(x = values$x_2, y = values$y_2, color = values$group_color, fill = values$group_fill)
-          geoms <- create_geom(c(as.character(values$geom_2_1), as.character(values$geom_2_2)))
+          geoms <- if_else(!isTRUE(values$tab_group),
+                           create_geom(c(as.character(values$geom_2_1), as.character(values$geom_2_2))),
+                           create_geom(c(as.character(values$geom_2_1), as.character(values$geom_2_2)), alpha = c(values$group_alpha, "NULL"))
+          )
         }
         facet <- create_facet(as.character(values$group_facet))
-        final_str <- combine_string(init_layer = init_layer, geoms = geoms, facet = facet)}
+        legend_pos <- create_custom_theme(values$group_legend)
+        # flip <- create_coord_flip(..)
+        #  pal <- create_palette(..)
+        
+        final_str <- if_else(!isTRUE(values$tab_group),
+                             combine_string(init_layer = init_layer, geoms = geoms, facet = facet),
+                             combine_string(init_layer = init_layer, geoms = geoms, facet = facet, theme_custom = legend_pos)
+        )
+      }
     })
     
     # Update code block based on selectInput
