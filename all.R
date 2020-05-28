@@ -19,6 +19,8 @@ library(shinyFeedback)
 
 ## check shinyWidgets::panel, dropdown, spectrumInput
 ## shinyFeedback
+# https://datavizcatalogue.com/search.html
+
 
 ## Graph selector? https://infogram.com/page/choose-the-right-chart-data-visualization
 
@@ -84,6 +86,10 @@ gglearn <- function(dataset){
                               
                             )
                    ),
+                   ############################################################
+                   ###############      1 VARIABLE
+                   ##############
+                   #############################################################
                    tabPanel(title = "1 Variable", icon = icon("chart-area"),
                             # Exploring 1 variables
                             fluidPage(
@@ -110,7 +116,7 @@ gglearn <- function(dataset){
                                                                                c("None" = "none",
                                                                                  "Natural Logarithm" = "ln",
                                                                                  "Inverse" = "inverse",
-                                                                                 "Others?" = "..."))
+                                                                                 "Scale" = "scale"))
                                                             ),
                                                             column(width = 6,
                                                                    selectInput("overlay_norm", "Overlay Normal Dist.",
@@ -121,13 +127,13 @@ gglearn <- function(dataset){
                                                             icon = icon("chart-area")),
                                                    tabPanel("Styling",
                                                             column(6,
-                                                                   textInput("p_1_x_lab", "X label", "X-variable")
+                                                                   textInput("p_1_x_lab", "X label", "X")
                                                             ),
                                                             column(6,
                                                                    textInput("p_1_title", "Title", "Your Title")
                                                             ),
                                                             column(6,
-                                                                   selectInput("p_theme", "Theme", 
+                                                                   selectInput("p_1_theme", "Theme", 
                                                                                c("Default (gray)" = "gray",
                                                                                  "light" = "light",
                                                                                  "bw" = "bw",
@@ -136,7 +142,7 @@ gglearn <- function(dataset){
                                                                                  "void" = "void",
                                                                                  "dark" = "dark")
                                                                    )
-                                                            ),
+                                                            ), 
                                                             column(6,
                                                                    spectrumInput(
                                                                      inputId = "p_1_fill",
@@ -168,6 +174,10 @@ gglearn <- function(dataset){
                               )
                             )
                    ),
+                   ############################################################
+                   ###############      2 VARIABLES
+                   ##############
+                   #############################################################
                    tabPanel(title = "2 Variables", icon = icon("chart-line"),
                             fluidPage(
                               fluidRow(
@@ -176,34 +186,69 @@ gglearn <- function(dataset){
                                          "This is help text"
                                        )
                                 ),
-                                column(3,
-                                       varSelectInput("x_2", "X", dataset)
-                                ),
-                                column(3,
-                                       varSelectInput("y_2", "Y", dataset)
-                                ),
-                                br(),
-                                column(3, offset = 6,
-                                       selectInput("geom_2_1", "Plot Type",
-                                                   c("Scatter" = "scatter",
-                                                     "Line" = "line",
-                                                     "Violin" = "violin",
-                                                     "Boxplot" = "box",
-                                                     "Bar" = "bar",
-                                                     "Smooth" = "smooth")
+                                column(6, 
+                                       tabsetPanel(type = "tabs",
+                                                   tabPanel("Layout", 
+                                                            column(6,
+                                                                   varSelectInput("x_2", "X", dataset)
+                                                            ),
+                                                            column(6,
+                                                                   varSelectInput("y_2", "Y", dataset)
+                                                            ),
+                                                            br(),
+                                                            column(6, 
+                                                                   selectInput("geom_2_1", "Plot Type",
+                                                                               c("Scatter" = "scatter",
+                                                                                 "Line" = "line",
+                                                                                 "Violin" = "violin",
+                                                                                 "Boxplot" = "box",
+                                                                                 "Bar" = "bar",
+                                                                                 "Smooth" = "smooth")
+                                                                   )
+                                                            ),
+                                                            column(6,
+                                                                   selectInput("geom_2_2", "Plot Type 2",
+                                                                               c("None" = "NULL",
+                                                                                 "Scatter" = "scatter",
+                                                                                 "Line" = "line",
+                                                                                 "Violin" = "violin",
+                                                                                 "Boxplot" = "box",
+                                                                                 "Bar" = "bar",
+                                                                                 "Smooth" = "smooth")
+                                                                   )
+                                                                   
+                                                            ),
+                                                            icon = icon("chart-line")
+                                                   ),
+                                                   tabPanel("Styling", 
+                                                            column(6,
+                                                                   textInput("p_2_x_lab", "X label", "X")
+                                                            ),
+                                                            column(6,
+                                                                   textInput("p_2_y_lab", "Y label", "Y")
+                                                            ),
+                                                            column(6,
+                                                                   selectInput("p_2_shape", "Geom 1 shape", shape_opts())
+                                                            ),
+                                                            column(6,
+                                                                   spectrumInput(
+                                                                     inputId = "p_2_color",
+                                                                     label = "Geom 2 color",
+                                                                     choices = list(
+                                                                       list("steelblue", "forestgreen", "#C93312", "#DC863B", "#E1AF00" , "slateblue4"),
+                                                                       as.list(brewer_pal(palette = "Blues")(6)),
+                                                                       as.list(brewer_pal(palette = "Greens")(6)),
+                                                                       as.list(brewer_pal(palette = "Spectral")(6)),
+                                                                       as.list(brewer_pal(palette = "Dark2")(6))
+                                                                     ),
+                                                                     options = list(`toggle-palette-more-text` = "Show palette",
+                                                                                    `toggle-palette-less-text` = "Hide palette")
+                                                                   )
+                                                            ),
+                                                            
+                                                            icon = icon("palette")
+                                                   )
                                        )
-                                ),
-                                column(3,
-                                       selectInput("geom_2_2", "Plot Type 2",
-                                                   c("None" = "NULL",
-                                                     "Scatter" = "scatter",
-                                                     "Line" = "line",
-                                                     "Violin" = "violin",
-                                                     "Boxplot" = "box",
-                                                     "Bar" = "bar",
-                                                     "Smooth" = "smooth")
-                                       )
-                                       
                                 )
                               ),
                               fluidRow(
@@ -217,6 +262,10 @@ gglearn <- function(dataset){
                               )
                             )
                    ),
+                   ############################################################
+                   ###############      GROUPING
+                   ##############
+                   #############################################################
                    tabPanel(title = "Grouping", icon = icon("group"),
                             fluidPage(
                               fluidRow(
@@ -225,21 +274,61 @@ gglearn <- function(dataset){
                                          "This is help text"
                                        )
                                 ),
-                                column(3,
-                                       selectInput("group_plot", "Choose plot",
-                                                   c("1 variable" = "1_var_plot",
-                                                     "2 variables" = "2_var_plot"))
-                                ),
-                                column(3,
-                                       selectInput("group_color", "Color", c("None" = "NULL", columns))
-                                ),
-                                br(),
-                                column(3, offset = 6,
-                                       selectInput("group_fill", "Fill", c("None" = "NULL", columns))
-                                ),
-                                column(3,
-                                       selectInput("group_facet", "Facet", c("None" = "NULL", columns))
-                                       
+                                column(6,
+                                       tabsetPanel(type = "tabs",
+                                                   tabPanel("Layout", 
+                                                            column(6,
+                                                                   selectInput("group_plot", "Choose plot",
+                                                                               c("1 variable" = "1_var_plot",
+                                                                                 "2 variables" = "2_var_plot"))
+                                                            ),
+                                                            column(6,
+                                                                   selectInput("group_color", "Color", c("None" = "NULL", columns))
+                                                            ),
+                                                            br(),
+                                                            column(6,
+                                                                   selectInput("group_fill", "Fill", c("None" = "NULL", columns))
+                                                            ),
+                                                            column(6,
+                                                                   selectInput("group_facet", "Facet", c("None" = "NULL", columns))
+                                                                   
+                                                            ), icon = icon("group")
+                                                   ),
+                                                   tabPanel("Styling", 
+                                                            # PALETTE, OPACITY, COORD FLIP, LEGEND POSITION
+                                                            column(6,
+                                                                   selectizeInput("group_palette", "Palette", choices = list(
+                                                                     "Default" = "NULL",
+                                                                     Discrete = c(
+                                                                       "Dark2" = "Dark2",
+                                                                       "Greens" = "Greens",
+                                                                       "YlOrRd" = "YlOrRd"),
+                                                                     Continuous = c(
+                                                                       "Viridis" = "viridis",
+                                                                       "Inferno" = "inferno",
+                                                                       "Plasma" = "plasma")
+                                                                     
+                                                                   )
+                                                                   )
+                                                            ),
+                                                            column(6,
+                                                                   selectInput("group_legend", "Legend position", 
+                                                                               c("Right" = "right",
+                                                                                 "Top" = "top",
+                                                                                 "Bottom" = "bottom",
+                                                                                 "Remove" = "none")
+                                                                   )
+                                                            ),
+                                                            br(),
+                                                            column(6,
+                                                                   sliderInput("group_alpha", "Geom 1 opacity", 0, 1, 1, 0.2)
+                                                            ),
+                                                            column(6,
+                                                                   switchInput(inputId = "group_coord_flip", label = strong("Flip axes"), value = FALSE, onLabel = "", offLabel = "")),
+                                                            
+                                                            icon = icon("palette")
+                                                   )
+                                       )
                                 )
                               ),
                               fluidRow(
@@ -400,6 +489,7 @@ gglearn <- function(dataset){
     })
     
     
+    #p_1_x_lab p_1_title p_1_fill p_1_themem
     # Update code based on inputs
     observe({
       values$str_plot_1 <- {
@@ -507,7 +597,12 @@ gglearn <- function(dataset){
         legend <- create_custom_theme(values$p_legend)
         
         facet <- create_facet(as.character(values$group_facet))
-        final_str <- combine_string(init_layer = init_layer, geoms = geoms, facet = facet, labs = labs, theme_std = plot_theme, theme_custom = legend)}
+        final_str <- combine_string(init_layer = init_layer, 
+                                    geoms = geoms, 
+                                    facet = facet, 
+                                    labs = labs, 
+                                    theme_std = plot_theme, 
+                                    theme_custom = legend)}
     })
     
     # Update code block based on selectInput
@@ -533,7 +628,6 @@ gglearn <- function(dataset){
 
 
 gglearn(dataset = iris)
-
 
 
 
