@@ -25,6 +25,8 @@ library(shinyFeedback)
 ### Tranformations: scale, log, 1/x
 ### Palletes
 ## Coord flip
+## geom_histogram(stat = "count")
+
 
 ## choose plot toggle knap
 
@@ -37,55 +39,31 @@ gglearn <- function(dataset){
   columns <- setNames(as.list(names(dataset)), names(dataset))
   
   ui <- navbarPage("gglearn2", windowTitle = NULL, theme = "lumen",
-                   # Initialize shinyfeedback
                    
-                   # Tab 1: Dataframe and summary statistics
+                   # Tab 1: Intro and flowchart
                    tabPanel(title = "Introduction", icon = icon("stats", lib = "glyphicon"),
+                            # Initialize shinyfeedback
                             useShinyFeedback(),
                             fluidPage(
                               fluidRow(
                                 column(width = 6,
-                                       wellPanel(
-                                         "This is help text")
+                                       panel(
+                                         p("gglearn is a tool for learning to code using ggplot2."),
+                                         p("The app is structured into 3 categories to help you learn the fundamentals of statistical plotting
+                                           as well as basic ways of making your plots look pretty."),
+                                         p("All tabs have an interactive code block which shows you the code used to produce the currently shown plot."),
+                                         p("Experiment with modifying the code and watch the plots change in response!")
+                                       )
                                 ),
-                                column(width = 3,
-                                       wellPanel(
-                                         "Number of rows: ")
+                                column(width = 6, 
+                                       aceEditor("code_intro_ace", "", wordWrap = T, theme = tolower(rstudioapi::getThemeInfo()$editor), 
+                                                 mode = "r", height = "120px", value = 'print("Hello world!")'),
+                                       verbatimTextOutput("intro_output"),
+                                       actionButton("insert_code_intro", "Insert code in script"),
                                 ),
-                                column(width = 3,
-                                       wellPanel(
-                                         "Number of columns :")
-                                )
-                              ),
-                              fluidRow(
-                                column(width = 3, offset = 6,
-                                       wellPanel(
-                                         "More stats: ")
-                                ),
-                                column(width = 3,
-                                       wellPanel(
-                                         "Even more: ")
-                                ),
-                              ),
-                              hr(),
-                              fluidRow(
-                                column(5,
-                                       h3("Summary of factor variables"),
-                                       DTOutput("skim_factor")
-                                ),
-                                column(5, offset = 1,
-                                       h3("Summary of numeric variables"),
-                                       DTOutput("skim_numeric")
-                                )
-                              ),
-                              fluidRow(
-                                column(12,
-                                       h3("First 10 rows of your data"),
-                                       DTOutput("dataframe") )
-                                
-                              ),
-                              textAreaInput("code_1", "Code goes here", value = "CODEEE")
-                              
+                                hr(),
+                                imageOutput("flow_chart")
+                              )
                             )
                    ),
                    ############################################################
@@ -97,8 +75,13 @@ gglearn <- function(dataset){
                             fluidPage(
                               fluidRow(
                                 column(width = 6,
-                                       wellPanel(
-                                         "This is help text")
+                                       panel(
+                                         p("1 variable plots are useful for investigating distributions."),
+                                         p("Density plots give you a sense of the general distribution by smoothing out the data"),
+                                         p("Histograms provides counts and a less-smooth representation of the distribution"),
+                                         p("QQ-plots easily lets you investigate whether your data follows the normal/Gaussian distribution. 
+                                           A straight line indicates perfect normality and a curved line indicates skewed data.")
+                                       )
                                 ),
                                 column(width = 6,
                                        tabsetPanel(type = "tabs", id = "tab_1_var",
@@ -449,49 +432,50 @@ gglearn <- function(dataset){
     lapply(vars, obs_up)
     
     ######################### OUTPUTS FOR TAB 1 - SUMMARY STATS
-    output$skim_factor <- renderDT({
-      dataset %>%
-        select(where(is.factor)) %>%
-        skim() %>%
-        as_tibble() %>%
-        select(skim_variable, n_missing, factor.n_unique, factor.top_counts) %>% 
-        rename_at(vars(starts_with("factor")),
-                  funs(str_replace(., "factor.", ""))) %>% 
-        rename(variable = skim_variable) %>% 
-        rename_all(funs(str_replace(., "_", " "))) %>% 
-        rename_with(capitalize)
-    }, 
-    options = dt_options(), 
-    rownames = F
-    )
     
-    output$skim_numeric <- renderDT({
-      dataset %>%
-        select(where(is.numeric)) %>%
-        skim() %>%
-        as_tibble() %>% 
-        select(skim_variable, n_missing, numeric.mean, numeric.sd, numeric.hist) %>% 
-        rename_at(vars(starts_with("numeric")),
-                  funs(str_replace(., "numeric.", ""))) %>% 
-        mutate_if(is.numeric, funs(round(., 2))) %>% 
-        rename(Variable = skim_variable,
-               Histogram = hist) %>% 
-        rename_all(funs(str_replace(., "_", " "))) %>%
-        rename_with(capitalize)
-    }, options = dt_options(), rownames = F
-    )
+    # Show flowchart
+    output$flow_chart <- renderImage({
+      filename <- normalizePath(file.path('./images', 'example.jpg'))
+      
+      list(src = filename,
+           alt = "Fun text!")
+    }, deleteFile = FALSE)
     
-    output$dataframe <- renderDT({
-      head(dataset, 10)
-    },
-    options = dt_options("t)")
-    )
+    # insert code
+    insert_code <- function(button, code){
+      observeEvent(input[[button]], {
+        context <- rstudioapi::getSourceEditorContext()
+        rstudioapi::insertText(text = paste0("\n", values[[code]], "\n"), id = context$id)
+      })
+    }
+    
+    insert_code("insert_code_intro", "code_intro_ace")
+    
+    # Update vals
+    observeEvent(input$code_intro_ace, {
+      values$code_intro_ace <- input$code_intro_ace
+    })
+    
+    # Render output (if text)
+    output$intro_output <- renderText({
+      return(eval(parse(text = values$code_intro_ace)))
+    })
+    
+    
     
     ################################## OUTPUT FOR TAB 2: 1 VARIABLE
     
-    # Set warning if variable not numeric
-    observeEvent(input$x_1, {
-      feedbackWarning("x_1", !is.numeric(dataset[[input$x_1]]), "Variables should be numeric for this type of plot")
+    # Set warning if variable not numeric and if histogram with continuous variable
+    observe( {
+      if(!is.numeric(dataset[[values$x_1]]) & values$graph_1 == "hist"){
+        showFeedbackWarning("x_1", "You need to add \'stat=\"count\"\' to geom_histogram to make it work with factors")
+      }
+      else if(!is.numeric(dataset[[values$x_1]]) & values$graph_1 %in% c("dens", "qq")){
+        showFeedbackWarning("x_1", "You should use continuous variables for this type of plot")
+      }
+      else{
+        hideFeedback("x_1")
+      }
     })
     
     # Small helper (move?)
@@ -542,12 +526,6 @@ gglearn <- function(dataset){
     })
     
     ## Insert code
-    insert_code <- function(button, code){
-      observeEvent(input[[button]], {
-        context <- rstudioapi::getSourceEditorContext()
-        rstudioapi::insertText(text = paste0("\n", values[[code]], "\n"), id = context$id)
-      })
-    }
     insert_code("insert_code_1", "code_1_ace")
     
     
