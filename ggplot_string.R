@@ -54,6 +54,18 @@ check_length <- function(x, len){
 }
 
 
+create_stat_geom <- function(type="overlay_norm", var = NULL){
+  h <- hash("overlay_norm" = paste0("stat_function(fun = dnorm, ",
+                                    "args = list(",
+                                    "mean = mean(dataset$", var, ")",
+                                    ", sd = sd(dataset$", var, ")))"))
+  geom_str <- as.character(h[[type]])
+  return(geom_str)
+}
+# stat_function(fun = dnorm, args = list(mean = mean(df$PF), sd = sd(df$PF)))
+
+create_stat_geom(type = "overlay_norm", var = "x")
+
 create_geom <- function(geom, color=NULL, fill=NULL, shape=NULL, alpha=NULL){
   if (length(geom)>1){
     n <- length(geom)
@@ -261,4 +273,8 @@ combine_string <- function(libraries = "library(ggplot2)",
 # cat(e_string)
 # head(df)
 
+
+# TODO
+# Overlay normal
+# tranformations
 
