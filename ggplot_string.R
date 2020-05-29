@@ -276,19 +276,19 @@ combine_string <- function(libraries = "library(ggplot2)",
 
 # 
 # 
-dataset <- iris
-x <- "Sepal.Length"
-y <- "Petal.Width"
-fill <- "Species"
-color <- "Species"
-shape <- "Species"
-
-
-libraries <- "library(ggplot2)"
-init_layer <- create_init(x = x, y = y, fill = fill, color = color, shape = shape)
-
-geoms <- create_geom(c("scatter", "coord_flip"))
- 
+# dataset <- iris
+# x <- "Sepal.Length"
+# y <- "Petal.Width"
+# fill <- "Species"
+# color <- "Species"
+# shape <- "Species"
+# 
+# 
+# libraries <- "library(ggplot2)"
+# init_layer <- create_init(x = x, y = y, fill = fill, color = color, shape = shape)
+# 
+# geoms <- create_geom(c("scatter", "coord_flip"))
+#  
 # std_theme <- create_std_theme(theme = "bw")
 # custom_theme <- create_custom_theme(rm_legend = F)
 # labs <- create_labs(title = "example", color = "BLOMSTER for helved")
