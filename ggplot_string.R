@@ -60,7 +60,7 @@ add_transform <- function(init_str, arg_to_trans = "x", transform) {
   arg <- geom_extract_arg(init_str, arg_to_trans)
   res <- geom_replace_arg(init_str, 
                    arg_to_rep = arg_to_trans, 
-                   replacement = paste0(transform, "(", arg, ")")
+                   replacement = paste0(transform, "(", arg, ")", sep = "")
                    )
   return(res)
 }
@@ -91,6 +91,7 @@ check_length <- function(x, len){
 }
 
 
+
 create_stat_geom <- function(type="overlay_norm", var = NULL){
   if (is.null(type)){
     return(NULL)
@@ -98,7 +99,7 @@ create_stat_geom <- function(type="overlay_norm", var = NULL){
   h <- hash("overlay_norm" = paste0("stat_function(fun = dnorm, ",
                                     "args = list(",
                                     "mean = mean(dataset$", var, ")",
-                                    ", sd = sd(dataset$", var, ")))"))
+                                    ", sd = sd(dataset$", var, ")), color = 'red')"))
   geom_str <- as.character(h[[type]])
   return(geom_str)
 }
@@ -137,6 +138,7 @@ create_geom <- function(geom, color=NULL, fill=NULL, shape=NULL, alpha=NULL){
             "violin" = "geom_violin()",
             "box" = "geom_boxplot()",
             "smooth" = "geom_smooth()",
+            "lm" = "geom_smooth(method='lm')",
             "coord_flip" = "coord_flip()"
   )
   geom_str = h[[geom]]
@@ -299,6 +301,7 @@ combine_string <- function(libraries = "library(ggplot2)",
       e_string <- add_layer(e_string, geom)
     }
   }
+  
   e_string <- add_layer(e_string, labs)
   e_string <- add_layer(e_string, theme_std)
   e_string <- add_layer(e_string, theme_custom)
