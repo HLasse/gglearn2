@@ -44,9 +44,8 @@ gglearn <- function(dataset){
                                 ),
                                 column(width = 6, 
                                        aceEditor("code_intro_ace", "", wordWrap = T, theme = tolower(rstudioapi::getThemeInfo()$editor), 
-                                                 mode = "r", height = "120px", value = 'print("Hello world!")'),
-                                       verbatimTextOutput("intro_output"),
-                                       actionButton("insert_code_intro", "Insert code in script"),
+                                                 mode = "r", height = "120px", value = 'print("Welcome to gglearn2!")'),
+                                       verbatimTextOutput("intro_output")
                                 ),
                                 hr(),
                                 imageOutput("flow_chart")
@@ -248,14 +247,16 @@ gglearn <- function(dataset){
                                        tabsetPanel(type = "tabs", id = "tab_group",
                                                    tabPanel("Layout", value = "l",
                                                             column(6,
-                                                                   selectInput("group_plot", "Choose plot",
-                                                                               c("1 variable" = "1_var_plot",
-                                                                                 "2 variables" = "2_var_plot"))
+                                                                   
+                                                          tags$style(HTML(".chart_list { font-size: 30px; color: SteelBlue;}")),
+                                                          radioButtons("group_plot", label = "Choose plot",
+                                                                       choiceNames = list(icon("chart-area", class = "chart_list"), icon("chart-line", class = "chart_list")),
+                                                                       choiceValues = list("1_var_plot", "2_var_plot"), inline = T)
                                                             ),
                                                             column(6,
                                                                    selectInput("group_color", "Color", c("None" = "NULL", columns))
                                                             ),
-                                                            br(),
+                                                           # br(),
                                                             column(6,
                                                                    selectInput("group_fill", "Fill", c("None" = "NULL", columns))
                                                             ),
@@ -363,16 +364,6 @@ gglearn <- function(dataset){
            alt = "Fun text!")
     }, deleteFile = FALSE)
     
-    # insert code
-    insert_code <- function(button, code){
-      observeEvent(input[[button]], {
-        context <- rstudioapi::getSourceEditorContext()
-        rstudioapi::insertText(text = paste0("\n", values[[code]], "\n"), id = context$id)
-      })
-    }
-    
-    insert_code("insert_code_intro", "code_intro_ace")
-    
     # Update vals
     observeEvent(input$code_intro_ace, {
       values$code_intro_ace <- input$code_intro_ace
@@ -453,6 +444,13 @@ gglearn <- function(dataset){
     })
     
     ## Insert code
+    insert_code <- function(button, code){
+      observeEvent(input[[button]], {
+        context <- rstudioapi::getSourceEditorContext()
+        rstudioapi::insertText(text = paste0("\n", values[[code]], "\n"), id = context$id)
+      })
+    }
+    
     insert_code("insert_code_1", "code_1_ace")
     
     
@@ -464,12 +462,12 @@ gglearn <- function(dataset){
     ## Warning if violin or boxplot with non-factor x-variable
     observe( {
       feedbackWarning("geom_2_1", input$geom_2_1 %in% c("violin", "box") & is.numeric(dataset[[input$x_2]]), 
-                      "The X variable should be numeric for this type of plot")
+                      "The X variable should be a factor for this type of plot")
     })
     
     observe( {
       feedbackWarning("geom_2_2", input$geom_2_2 %in% c("violin", "box") & is.numeric(dataset[[input$x_2]]), 
-                      "The X variable should be numeric for this type of plot")
+                      "The X variable should be a factor for this type of plot")
     })
     
     
@@ -511,8 +509,14 @@ gglearn <- function(dataset){
     
     ######################33 OUTPUT TAB 3: GROUPINGS
     
-    # "group_palette", "group_legend", "group_alpha", "group_coord_flip"
     observeEvent(input$tab_group, {show_styling("tab_group")})
+    
+    # Show warning if facetting with numeric variable
+    observe( {
+      feedbackWarning("group_facet", is.numeric(dataset[[input$group_facet]]), 
+                      "You usually want to facet by factor, not numeric, columns")
+    })
+    
     
     # update plot
     observe({
@@ -523,6 +527,9 @@ gglearn <- function(dataset){
                            create_geom(as.character(values$graph_1)),
                            create_geom(as.character(values$graph_1) , alpha = values$group_alpha)
           )
+          if(isTRUE(values$coord_flip_1)){
+            geoms <- c(geoms, create_geom("coord_flip"))
+          }
           
         }
         if(values$group_plot == "2_var_plot"){
@@ -572,12 +579,7 @@ gglearn <- function(dataset){
 gglearn(dataset = iris)
 
 
-
-# intro
-   # fjern indsæt i script
 # grouping:
-   # facet - warning ved num
-   # includer e.g. flip
    # lav choose plot on til knapper
 
 
