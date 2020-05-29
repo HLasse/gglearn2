@@ -2,7 +2,7 @@
 pacman::p_load(tidyverse, hash)
 
 create_init <- function(df = "dataset", x, y=NULL,
-                        fill=NULL, color=NULL, shape=NULL, add_trans=NULL){
+                        fill=NULL, color=NULL, shape=NULL){
   y <- str_to_null(y)
   fill <- str_to_null(fill)
   color <- str_to_null(color)
@@ -53,6 +53,9 @@ geom_extract_arg <- function(str, arg_to_extract = "x") {
 
 
 add_transform <- function(init_str, arg_to_trans = "x", transform) {
+  if (is.null(transform)){
+    return(init_str)
+  }
   arg <- geom_extract_arg(init_str, arg_to_trans)
   res <- geom_replace_arg(init_str, 
                    arg_to_rep = arg_to_trans, 
@@ -237,6 +240,17 @@ create_facet <- function(by){
 }
 
 
+"Default" = "NULL",
+Discrete = c(
+  "Dark2" = "Dark2",
+  "Greens" = "Greens",
+  "YlOrRd" = "YlOrRd"),
+Continuous = c(
+  "Viridis" = "viridis",
+  "Inferno" = "inferno",
+  "Plasma" = "plasma")
+
+
 combine_string <- function(libraries = "library(ggplot2)",
                            init_layer,
                            geoms,
@@ -270,6 +284,7 @@ combine_string <- function(libraries = "library(ggplot2)",
   
   return(e_string)
 }
+
 
 # init_layer <- create_init(x = "x")
 # combine_string(init_layer =init_layer, geoms = create_geom("qq"))
