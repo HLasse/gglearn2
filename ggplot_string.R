@@ -91,6 +91,9 @@ check_length <- function(x, len){
 
 
 create_stat_geom <- function(type="overlay_norm", var = NULL){
+  if (is.null(type)){
+    return(NULL)
+  }
   h <- hash("overlay_norm" = paste0("stat_function(fun = dnorm, ",
                                     "args = list(",
                                     "mean = mean(dataset$", var, ")",
