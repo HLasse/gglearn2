@@ -53,6 +53,7 @@ geom_extract_arg <- function(str, arg_to_extract = "x") {
 
 
 add_transform <- function(init_str, arg_to_trans = "x", transform) {
+  transform <- str_to_null(transform)
   if (is.null(transform)){
     return(init_str)
   }
