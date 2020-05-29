@@ -46,7 +46,7 @@ geom_replace_arg <- function(str, arg_to_rep = "x", replacement) {
 
 geom_extract_arg <- function(str, arg_to_extract = "x") {
   # Returns first match
-  regex <- paste0(arg_to_extract, "\\s*=(.*?)[,|\\)]")
+  regex <- paste0(arg_to_extract, "\\s*=\\s*(.*?)[,|\\)]")
   t <- str_match(str, pattern = regex)
   return(t[2])
 }
@@ -319,11 +319,11 @@ combine_string <- function(libraries = "library(ggplot2)",
   return(e_string)
 }
 
-# # Example for Lasse
+# Example for Lasse
 # init_layer <- create_init(x = "x")
 # res <-
 #   combine_string(
-#     init_layer = init_layer,
+#     init_layer = add_transform(init_layer, transform = "log"),
 #     geoms = create_geom("qq"),
 #     palette_color = "Dark2",
 #     palette_fill = "viridis"
