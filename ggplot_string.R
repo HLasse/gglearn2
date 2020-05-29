@@ -145,7 +145,7 @@ create_geom <- function(geom, color=NULL, fill=NULL, shape=NULL, alpha=NULL){
   if (is.null(geom_str)){stop(paste("The geom,", geom, "is not implemented"))}
   
   geom_str <- geom_add_arg(geom_str, add_quatations(color), "color")
-  geom_str <- geom_add_arg(geom_str, fill, "fill")
+  geom_str <- geom_add_arg(geom_str, add_quatations(fill), "fill")
   geom_str <- geom_add_arg(geom_str, shape, "shape")
   geom_str <- geom_add_arg(geom_str, alpha, "alpha")
   return(geom_str)
