@@ -13,19 +13,6 @@ library(shinyAce)
 library(shinyWidgets)
 library(scales)
 library(shinyFeedback)
-##### STANDARDIZE OG SCALE
-
-#### FORKLAR GATHER
-
-## check shinyWidgets::panel, dropdown, spectrumInput
-## shinyFeedback
-# https://datavizcatalogue.com/search.html
-
-
-### Tranformations: scale, log, 1/x
-### Palletes
-## Coord flip
-## geom_histogram(stat = "count")
 
 
 ## choose plot toggle knap
@@ -98,18 +85,15 @@ gglearn <- function(dataset){
                                                             
                                                             column(width = 6,
                                                                    selectInput("trans_1", "Transformation",
-                                                                               c("None" = "none",
-                                                                                 "Natural Logarithm" = "ln",
-                                                                                 "Inverse" = "inverse",
+                                                                               c("None" = "NULL",
+                                                                                 "Logarithm" = "log",
                                                                                  "Scale" = "scale"))
                                                             ),
-                                                            column(width = 6,
-                                                                   selectInput("overlay_norm", "Overlay Normal Dist.",
-                                                                               c("No" = "none",
-                                                                                 "Yes" = "yes")
-                                                                   )
+                                                            column(6,
+                                                                   switchInput(inputId = "coord_flip_1", label = strong("Flip axes"), value = FALSE, onLabel = "", offLabel = "")
                                                             ),
-                                                            icon = icon("chart-area")),
+                                                            icon = icon("chart-area")
+                                                   ),
                                                    tabPanel("Styling", value = "s",
                                                             column(6,
                                                                    textInput("p_1_title", "Title", "Your Title")
@@ -187,7 +171,8 @@ gglearn <- function(dataset){
                                                                                  "Violin" = "violin",
                                                                                  "Boxplot" = "box",
                                                                                  "Bar" = "bar",
-                                                                                 "Smooth" = "smooth")
+                                                                                 "Smooth" = "smooth",
+                                                                                 "Smooth (linear)" = "lm")
                                                                    )
                                                             ),
                                                             column(6,
@@ -198,7 +183,8 @@ gglearn <- function(dataset){
                                                                                  "Violin" = "violin",
                                                                                  "Boxplot" = "box",
                                                                                  "Bar" = "bar",
-                                                                                 "Smooth" = "smooth")
+                                                                                 "Smooth" = "smooth",
+                                                                                 "Smooth (linear)" = "lm")
                                                                    )
                                                                    
                                                             ),
@@ -281,20 +267,14 @@ gglearn <- function(dataset){
                                                    tabPanel("Styling", value = "s",
                                                             # PALETTE, OPACITY, COORD FLIP, LEGEND POSITION
                                                             column(6,
-                                                                   selectizeInput("group_palette", "Palette", choices = list(
-                                                                     "Default" = "NULL",
-                                                                     Discrete = c(
-                                                                       "Dark2" = "Dark2",
-                                                                       "Greens" = "Greens",
-                                                                       "YlOrRd" = "YlOrRd"),
-                                                                     Continuous = c(
-                                                                       "Viridis" = "viridis",
-                                                                       "Inferno" = "inferno",
-                                                                       "Plasma" = "plasma")
-                                                                     
-                                                                   )
+                                                                   selectizeInput("group_color_palette", "Color Palette", choices = palette_opts()
                                                                    )
                                                             ),
+                                                            column(6,
+                                                                   selectizeInput("group_fill_palette", "Fill Palette", choices = palette_opts()
+                                                                   )
+                                                            ),
+                                                            br(), 
                                                             column(6,
                                                                    selectInput("group_legend", "Legend position", 
                                                                                c("Right" = "right",
@@ -303,12 +283,9 @@ gglearn <- function(dataset){
                                                                                  "Remove" = "none")
                                                                    )
                                                             ),
-                                                            br(), 
                                                             column(6,
                                                                    sliderInput("group_alpha", "Geom 1 opacity", 0, 1, 1, 0.2)
                                                             ),
-                                                            column(6,
-                                                                   switchInput(inputId = "group_coord_flip", label = strong("Flip axes"), value = FALSE, onLabel = "", offLabel = "")),
                                                             
                                                             icon = icon("palette")
                                                    )
@@ -326,65 +303,11 @@ gglearn <- function(dataset){
                               )
                             )
                    ),
-                   tabPanel(title = "Making it pretty!", icon = icon("child"),
-                            fluidPage(
-                              fluidRow(
-                                column(6,
-                                       wellPanel(
-                                         "This is help text"
-                                       )
-                                ),
-                                column(3,
-                                       textInput("p_title", "Title", "Your Title")
-                                ),
-                                column(3,
-                                       selectInput("p_theme", "Theme", 
-                                                   c("Default (gray)" = "gray",
-                                                     "light" = "light",
-                                                     "bw" = "bw",
-                                                     "minimal" = "minimal",
-                                                     "classic" = "classic",
-                                                     "void" = "void",
-                                                     "dark" = "dark")
-                                       )
-                                ),
-                                br(),
-                                column(3, offset = 6,
-                                       textInput("p_x_lab", "X label", "X-variable")
-                                ),
-                                column(3,
-                                       textInput("p_y_lab", "Y label", "Y-variable")
-                                ),
-                                br(),
-                                column(3, offset = 6,
-                                       selectizeInput("p_col", "Geom color", c("NULL", colors()), multiple = F)
-                                ),
-                                column(3,
-                                       sliderInput("p_alpha", "Geom opacity", 0, 1, 1, 0.2)
-                                ),
-                                br(),
-                                column(3, offset = 6,
-                                       selectInput("p_shape", "Geom shape", shape_opts())
-                                ),
-                                column(3,
-                                       selectInput("p_legend", "Legend position", 
-                                                   c("Right" = "right",
-                                                     "Top" = "top",
-                                                     "Bottom" = "bottom",
-                                                     "Remove" = "none")
-                                       )
-                                )
-                              )
-                            ),
-                            fluidRow(
-                              column(width = 8,
-                                     plotOutput("plot_4_var")
-                              ),
-                              column(width = 4,
-                                     aceEditor("code_4_ace", "", wordWrap = T, theme = tolower(rstudioapi::getThemeInfo()$editor), mode = "r"),
-                                     actionButton("insert_code_4", "Insert code in script")
-                              )
-                            )
+                   ############################################################
+                   ###############      EXERCISES
+                   ##############
+                   #############################################################                   
+                   tabPanel(title = "Exercises", icon = icon("book")
                    ),
                    navbarMenu(title = "About", icon = icon("info"),
                               tabPanel("The app"),
@@ -401,16 +324,15 @@ gglearn <- function(dataset){
     source("ggplot_string.R")
     
     ######################### Setting reactive values
-    vars <- c("x_1", "graph_1", "trans_1", "overlay_norm",
+    vars <- c("x_1", "graph_1", "trans_1", "coord_flip_1",
               "p_1_x_lab", "p_1_title", "p_1_fill", "p_1_theme",
               # 2 vars
               "x_2", "y_2", "geom_2_1", "geom_2_2",
               "p_2_x_lab", "p_2_y_lab", "p_2_shape", "p_2_color",
               # grouping
               "group_plot", "group_color", "group_fill", "group_facet",
-              "group_alpha", "group_coord_flip", "group_palette", "group_legend",
-              "p_col", "p_alpha", "p_shape", "p_legend",
-              "p_x_lab", "p_y_lab", "p_title", "p_theme")
+              "group_alpha", "group_fill_palette", "group_color_palette", "group_legend")
+    
     
     show_styling_vars <- c("tab_1_var", "tab_2_var", "tab_group")
     
@@ -493,18 +415,23 @@ gglearn <- function(dataset){
       if (isTRUE(values$tab_1_var)) {
         values$str_plot_1 <- {
           init_layer <- create_init(x = values$x_1)
-          geoms <- create_geom(as.character(values$graph_1),
-                               fill = as.character(values$p_1_fill))
-          labs <- create_labs(title = values$p_1_title,
-                              x = values$p_1_x_lab)
+          init_layer <- add_transform(init_layer, transform = values$trans_1)
+          geoms <- create_geom(as.character(values$graph_1), fill = as.character(values$p_1_fill))
+          labs <- create_labs(title = values$p_1_title, x = values$p_1_x_lab)
           theme <- create_std_theme(values$p_1_theme)
-          
+          if(isTRUE(values$coord_flip_1)){
+            geoms <- c(geoms, create_geom("coord_flip"))
+          }
           final_str <- combine_string(init_layer = init_layer, geoms = geoms, labs = labs, theme_std = theme)}
       }
       else {
         values$str_plot_1 <- {
           init_layer <- create_init(x = values$x_1)
+          init_layer <- add_transform(init_layer, transform = values$trans_1)
           geoms <- create_geom(as.character(values$graph_1))
+          if(isTRUE(values$coord_flip_1)){
+            geoms <- c(geoms, create_geom("coord_flip"))
+          }
           final_str <- combine_string(init_layer = init_layer, geoms = geoms)
         }
       }
@@ -594,8 +521,9 @@ gglearn <- function(dataset){
           init_layer <- create_init(x = values$x_1, color = values$group_color, fill = values$group_fill)
           geoms <- if_else(!isTRUE(values$tab_group),
                            create_geom(as.character(values$graph_1)),
-                           create_geom(as.character(values$graph_1), alpha = values$group_alpha)
+                           create_geom(as.character(values$graph_1) , alpha = values$group_alpha)
           )
+          
         }
         if(values$group_plot == "2_var_plot"){
           init_layer <- create_init(x = values$x_2, y = values$y_2, color = values$group_color, fill = values$group_fill)
@@ -604,14 +532,16 @@ gglearn <- function(dataset){
                            create_geom(c(as.character(values$geom_2_1), as.character(values$geom_2_2)), alpha = c(values$group_alpha, "NULL"))
           )
         }
+        
         facet <- create_facet(as.character(values$group_facet))
         legend_pos <- create_custom_theme(values$group_legend)
-        # flip <- create_coord_flip(..)
-        #  pal <- create_palette(..)
         
         final_str <- if_else(!isTRUE(values$tab_group),
-                             combine_string(init_layer = init_layer, geoms = geoms, facet = facet),
-                             combine_string(init_layer = init_layer, geoms = geoms, facet = facet, theme_custom = legend_pos)
+                             combine_string(init_layer = init_layer, geoms = geoms, facet = facet, 
+                                            palette_color = values$group_colo_palette, palette_fill = values$group_fill_palette),
+                             combine_string(init_layer = init_layer, geoms = geoms, facet = facet, 
+                                            palette_color = values$group_color_palette, palette_fill = values$group_fill_palette,
+                                            theme_custom = legend_pos)
         )
       }
     })
@@ -632,46 +562,6 @@ gglearn <- function(dataset){
     
     insert_code("insert_code_3", "code_3_ace")
     
-    
-    ############################# OUTPUT TAB 4:  MAKING IT PRETTY
-    observe({
-      values$str_plot_4 <- {
-        if(values$group_plot == "1_var_plot"){
-          init_layer <- create_init(x = values$x_1, color = values$group_color, fill = values$group_fill)
-          geoms <- create_geom(as.character(values$graph_1), color = values$p_col, shape = values$p_shape, alpha = values$p_alpha)
-        }
-        if(values$group_plot == "2_var_plot"){
-          init_layer <- create_init(x = values$x_2, y = values$y_2, color = values$group_color, fill = values$group_fill)
-          geoms <- create_geom(c(as.character(values$geom_2_1), as.character(values$geom_2_2)), color = c(values$p_col, "NULL"), shape = c(values$p_shape, "NULL"), alpha = c(values$p_alpha, "NULL"))
-        }
-        labs <- create_labs(title = values$p_title, x = values$p_x_lab, y = values$p_y_lab)
-        plot_theme <- create_std_theme(values$p_theme)
-        legend <- create_custom_theme(values$p_legend)
-        
-        facet <- create_facet(as.character(values$group_facet))
-        final_str <- combine_string(init_layer = init_layer, 
-                                    geoms = geoms, 
-                                    facet = facet, 
-                                    labs = labs, 
-                                    theme_std = plot_theme, 
-                                    theme_custom = legend)}
-    })
-    
-    # Update code block based on selectInput
-    observe({
-      updateAceEditor(session, "code_4_ace", values$str_plot_4)
-    })
-    
-    # Update plot code after input
-    observeEvent(input$code_4_ace, {
-      values$code_4_ace <- input$code_4_ace
-    })
-    
-    output$plot_4_var <- renderPlot({
-      return(eval(parse(text = values$code_4_ace)))
-    })
-    
-    insert_code("insert_code_4", "code_4_ace")
     
   }
   
