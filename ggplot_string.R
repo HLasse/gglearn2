@@ -2,7 +2,7 @@
 pacman::p_load(tidyverse, hash)
 
 create_init <- function(df = "dataset", x, y=NULL,
-                        fill=NULL, color=NULL, shape=NULL, add_trans=NULL){
+                        fill=NULL, color=NULL, shape=NULL){
   y <- str_to_null(y)
   fill <- str_to_null(fill)
   color <- str_to_null(color)
@@ -53,6 +53,9 @@ geom_extract_arg <- function(str, arg_to_extract = "x") {
 
 
 add_transform <- function(init_str, arg_to_trans = "x", transform) {
+  if (is.null(transform)){
+    return(init_str)
+  }
   arg <- geom_extract_arg(init_str, arg_to_trans)
   res <- geom_replace_arg(init_str, 
                    arg_to_rep = arg_to_trans, 
@@ -88,6 +91,9 @@ check_length <- function(x, len){
 
 
 create_stat_geom <- function(type="overlay_norm", var = NULL){
+  if (is.null(type)){
+    return(NULL)
+  }
   h <- hash("overlay_norm" = paste0("stat_function(fun = dnorm, ",
                                     "args = list(",
                                     "mean = mean(dataset$", var, ")",
@@ -236,6 +242,26 @@ create_facet <- function(by){
   return(facet_str)
 }
 
+create_palette <- function(palette, type="fill"){
+  if (! type %in% c("fill", "color")){
+    stop("invalid type, should be fill or color")
+  }
+  brewer <- c("Dark2", "Greens", "YlOrRd")
+  viridis <- c("viridis", "inferno", "plasma")
+  if (palette %in% brewer){
+    lib = "library(RColorBrewer)"
+    str = paste0("scale_", type, "_brewer(palette = '", palette, "')")
+  } else if (palette %in% viridis){
+    lib = "library(viridis)"
+    str = paste0("scale_", type, "_viridis(option = '", palette, "')")
+  } else {
+    stop("invalid color palette")
+  }
+  return(list(str=str, lib=lib))
+}
+
+
+
 
 combine_string <- function(libraries = "library(ggplot2)",
                            init_layer,
@@ -243,8 +269,24 @@ combine_string <- function(libraries = "library(ggplot2)",
                            facet = NULL,
                            labs = NULL,
                            theme_std = NULL,
-                           theme_custom = NULL
+                           theme_custom = NULL,
+                           palette_fill = NULL,
+                           palette_color = NULL
+                           
 ){
+  palette_fill = str_to_null(palette_fill)
+  palette_color = str_to_null(palette_color)
+  if (! is.null(palette_fill)){
+    res = create_palette(palette_fill, type = "fill")
+    palette_fill = res$str
+    libraries = paste(libraries, res$lib, sep = "\n")
+  }
+  if (! is.null(palette_color)){
+    res = create_palette(palette_color, type = "color")
+    palette_color = res$str
+    libraries = paste(libraries, res$lib, sep = "\n")
+  }
+  
   geoms <- paste0("\t", geoms)
   e_string <- paste(libraries, init_layer, sep ="\n\n")
   
@@ -259,6 +301,8 @@ combine_string <- function(libraries = "library(ggplot2)",
   e_string <- add_layer(e_string, labs)
   e_string <- add_layer(e_string, theme_std)
   e_string <- add_layer(e_string, theme_custom)
+  e_string <- add_layer(e_string, palette_fill)
+  e_string <- add_layer(e_string, palette_color)
   
   # exception handling for qq
   x <- str_match(e_string, "geom_qq")[1, 1]
@@ -271,43 +315,14 @@ combine_string <- function(libraries = "library(ggplot2)",
   return(e_string)
 }
 
+# # Example for Lasse
 # init_layer <- create_init(x = "x")
-# combine_string(init_layer =init_layer, geoms = create_geom("qq"))
-
+# res <-
+#   combine_string(
+#     init_layer = init_layer,
+#     geoms = create_geom("qq"),
+#     palette_color = "Dark2",
+#     palette_fill = "viridis"
+#   )
 # 
-# 
-# dataset <- iris
-# x <- "Sepal.Length"
-# y <- "Petal.Width"
-# fill <- "Species"
-# color <- "Species"
-# shape <- "Species"
-# 
-# 
-# libraries <- "library(ggplot2)"
-# init_layer <- create_init(x = x, y = y, fill = fill, color = color, shape = shape)
-# 
-# geoms <- create_geom(c("scatter", "coord_flip"))
-#  
-# std_theme <- create_std_theme(theme = "bw")
-# custom_theme <- create_custom_theme(rm_legend = F)
-# labs <- create_labs(title = "example", color = "BLOMSTER for helved")
-# e_string <- combine_string(libraries,
-#                            init_layer = init_layer,
-#                            geoms = geoms,
-#                            labs = labs,
-#                            theme_std = std_theme,
-#                            theme_custom = custom_theme)
-# p <- eval(parse(text=e_string))
-# p
-# 
-# 
-# 
-# cat(e_string)
-# head(df)
-
-
-# TODO
-# Overlay normal
-# tranformations
-
+# cat(res)
