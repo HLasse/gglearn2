@@ -2,7 +2,7 @@
 pacman::p_load(tidyverse, hash)
 
 create_init <- function(df = "dataset", x, y=NULL,
-                        fill=NULL, color=NULL, shape=NULL){
+                        fill=NULL, color=NULL, shape=NULL, add_trans=NULL){
   y <- str_to_null(y)
   fill <- str_to_null(fill)
   color <- str_to_null(color)
@@ -26,6 +26,39 @@ create_init <- function(df = "dataset", x, y=NULL,
     e_string <- str_replace(e_string, "\\)\\)", rep_str)
   } 
   return(e_string)
+}
+
+
+
+geom_replace_arg <- function(str, arg_to_rep = "x", replacement) {
+  # # Example:
+  # geom_replace_arg("geom(aes(x    =df$TOTO, y = df$duck))",
+  #                  arg_to_rep = "x",
+  #                  replacement = "log(df$TOTO)")
+  
+  t <- str_match(str, paste0(arg_to_rep, "\\s*=.*?(,|\\))"))
+  end_sym <- t[length(t)]
+  
+  regex <- paste0(arg_to_rep, "\\s*=.*?[,|\\)]")
+  rep_str <- paste0(arg_to_rep, " = ", replacement, end_sym)
+  return (str_replace(str, pattern = regex, rep_str))
+}
+
+geom_extract_arg <- function(str, arg_to_extract = "x") {
+  # Returns first match
+  regex <- paste0(arg_to_extract, "\\s*=(.*?)[,|\\)]")
+  t <- str_match(str, pattern = regex)
+  return(t[2])
+}
+
+
+add_transform <- function(init_str, arg_to_trans = "x", transform) {
+  arg <- geom_extract_arg(init_str, arg_to_trans)
+  res <- geom_replace_arg(init_str, 
+                   arg_to_rep = arg_to_trans, 
+                   replacement = paste0(transform, "(", arg, ")")
+                   )
+  return(res)
 }
 
 geom_add_arg <- function(geom_str, arg, name){
@@ -62,9 +95,7 @@ create_stat_geom <- function(type="overlay_norm", var = NULL){
   geom_str <- as.character(h[[type]])
   return(geom_str)
 }
-# stat_function(fun = dnorm, args = list(mean = mean(df$PF), sd = sd(df$PF)))
 
-create_stat_geom(type = "overlay_norm", var = "x")
 
 create_geom <- function(geom, color=NULL, fill=NULL, shape=NULL, alpha=NULL){
   if (length(geom)>1){
