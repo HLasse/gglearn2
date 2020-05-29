@@ -129,7 +129,8 @@ create_geom <- function(geom, color=NULL, fill=NULL, shape=NULL, alpha=NULL){
             "scatter" = "geom_point()",
             "violin" = "geom_violin()",
             "box" = "geom_boxplot()",
-            "smooth" = "geom_smooth()"
+            "smooth" = "geom_smooth()",
+            "coord_flip" = "coord_flip()"
   )
   geom_str = h[[geom]]
   if (is.null(geom_str)){stop(paste("The geom,", geom, "is not implemented"))}
@@ -275,19 +276,19 @@ combine_string <- function(libraries = "library(ggplot2)",
 
 # 
 # 
-# dataset <- iris
-# x <- "Sepal.Length"
-# y <- "Petal.Width"
-# fill <- "Species"
-# color <- "Species"
-# shape <- "Species"
-# 
-# 
-# libraries <- "library(ggplot2)"
-# init_layer <- create_init(x = x, y = y, fill = fill, color = color, shape = shape)
-# 
-# geoms <- c(create_geom("scatter"), create_geom("line"))
-# 
+dataset <- iris
+x <- "Sepal.Length"
+y <- "Petal.Width"
+fill <- "Species"
+color <- "Species"
+shape <- "Species"
+
+
+libraries <- "library(ggplot2)"
+init_layer <- create_init(x = x, y = y, fill = fill, color = color, shape = shape)
+
+geoms <- create_geom(c("scatter", "coord_flip"))
+ 
 # std_theme <- create_std_theme(theme = "bw")
 # custom_theme <- create_custom_theme(rm_legend = F)
 # labs <- create_labs(title = "example", color = "BLOMSTER for helved")
