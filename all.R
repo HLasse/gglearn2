@@ -9,126 +9,159 @@ library(skimr)
 library(listviewer)
 library(knitr)
 library(kableExtra)
-#, options = list(columns = list(width = "100%"))
+library(shinyAce)
+library(shinyWidgets)
+library(scales)
+library(shinyFeedback)
+##### STANDARDIZE OG SCALE
+
+#### FORKLAR GATHER
+
+## check shinyWidgets::panel, dropdown, spectrumInput
+## shinyFeedback
+# https://datavizcatalogue.com/search.html
 
 
+### Tranformations: scale, log, 1/x
+### Palletes
+## Coord flip
+## geom_histogram(stat = "count")
 
-shiny_gogo <- function(dataset){
+
+## choose plot toggle knap
+
+#### i facet behold kun factor/fjern numeric
+gglearn <- function(dataset){
   
+  source("helpers.R")
   
-  
-  ### help functions
-  capitalize <- function(x) {
-    substr(x, 1, 1) <- toupper(substr(x, 1, 1))
-    x
-  }
-  
-  
-  
-  
-  # Options for rendering datatables
-  dt_options <- list(
-    dom = "tip",
-    scrollX = TRUE,
-    scrollY = TRUE,
-    autoWidth = TRUE,
-    columnDefs = list(list(width = '20%', targets = "_all")))
-  
+  # Get named list of columns in dataset
+  columns <- setNames(as.list(names(dataset)), names(dataset))
   
   ui <- navbarPage("gglearn2", windowTitle = NULL, theme = "lumen",
-                   # Tab 1: Dataframe and summary statistics
                    
+                   # Tab 1: Intro and flowchart
                    tabPanel(title = "Introduction", icon = icon("stats", lib = "glyphicon"),
+                            # Initialize shinyfeedback
+                            useShinyFeedback(),
                             fluidPage(
                               fluidRow(
                                 column(width = 6,
-                                       wellPanel(
-                                         "This is help text")
+                                       panel(
+                                         p("gglearn is a tool for learning to code using ggplot2."),
+                                         p("The app is structured into 3 categories to help you learn the fundamentals of statistical plotting
+                                           as well as basic ways of making your plots look pretty."),
+                                         p("All tabs have an interactive code block which shows you the code used to produce the currently shown plot."),
+                                         p("Experiment with modifying the code and watch the plots change in response!")
+                                       )
                                 ),
-                                column(width = 3,
-                                       wellPanel(
-                                         "Number of rows: ")
+                                column(width = 6, 
+                                       aceEditor("code_intro_ace", "", wordWrap = T, theme = tolower(rstudioapi::getThemeInfo()$editor), 
+                                                 mode = "r", height = "120px", value = 'print("Hello world!")'),
+                                       verbatimTextOutput("intro_output"),
+                                       actionButton("insert_code_intro", "Insert code in script"),
                                 ),
-                                column(width = 3,
-                                       wellPanel(
-                                         "Number of columns :")
-                                )
-                              ),
-                              fluidRow(
-                                column(width = 3, offset = 6,
-                                       wellPanel(
-                                         "More stats: ")
-                                ),
-                                column(width = 3,
-                                       wellPanel(
-                                         "Even more: ")
-                                ),
-                              ),
-                              hr(),
-                              fluidRow(
-                                column(5,
-                                       h3("Summary of factor variables"),
-                                       DTOutput("skim_factor")
-                                ),
-                                column(5, offset = 1,
-                                       h3("Summary of numeric variables"),
-                                       DTOutput("skim_numeric")
-                                )
-                              ),
-                              fluidRow(
-                                column(12,
-                                       h3("First 10 rows of your data"),
-                                       DTOutput("dataframe") )
-                                
-                              ),
-                              textAreaInput("test", "Code goes here", value = "CODEEE")
-                              
+                                hr(),
+                                imageOutput("flow_chart")
+                              )
                             )
                    ),
+                   ############################################################
+                   ###############      1 VARIABLE
+                   ##############
+                   #############################################################
                    tabPanel(title = "1 Variable", icon = icon("chart-area"),
                             # Exploring 1 variables
                             fluidPage(
                               fluidRow(
                                 column(width = 6,
-                                       wellPanel(
-                                         "This is help text")
+                                       panel(
+                                         p("1 variable plots are useful for investigating distributions."),
+                                         p("Density plots give you a sense of the general distribution by smoothing out the data"),
+                                         p("Histograms provides counts and a less-smooth representation of the distribution"),
+                                         p("QQ-plots easily lets you investigate whether your data follows the normal/Gaussian distribution. 
+                                           A straight line indicates perfect normality and a curved line indicates skewed data.")
+                                       )
                                 ),
-                                column(width = 3,
-                                       selectInput("graph_1", "Graph Type", 
-                                                   c("Density" = "dens",
-                                                     "Histogram" = "hist",
-                                                     "Barplot" = "bar",
-                                                     "QQ Plot" = "qq"))
-                                ),
-                                column(width = 3,
-                                       varSelectInput("x_1", "Variable", dataset)
+                                column(width = 6,
+                                       tabsetPanel(type = "tabs", id = "tab_1_var",
+                                                   tabPanel("Layout", value = "l",
+                                                            column(width = 6,
+                                                                   selectInput("graph_1", "Graph Type",
+                                                                               c("Density" = "dens",
+                                                                                 "Histogram" = "hist",
+                                                                                 "QQ Plot" = "qq"))
+                                                            ),
+                                                            column(width = 6,
+                                                                   varSelectInput("x_1", "Variable", dataset)
+                                                            ),
+                                                            
+                                                            column(width = 6,
+                                                                   selectInput("trans_1", "Transformation",
+                                                                               c("None" = "none",
+                                                                                 "Natural Logarithm" = "ln",
+                                                                                 "Inverse" = "inverse",
+                                                                                 "Scale" = "scale"))
+                                                            ),
+                                                            column(width = 6,
+                                                                   selectInput("overlay_norm", "Overlay Normal Dist.",
+                                                                               c("No" = "none",
+                                                                                 "Yes" = "yes")
+                                                                   )
+                                                            ),
+                                                            icon = icon("chart-area")),
+                                                   tabPanel("Styling", value = "s",
+                                                            column(6,
+                                                                   textInput("p_1_title", "Title", "Your Title")
+                                                            ),
+                                                            column(6,
+                                                                   textInput("p_1_x_lab", "X label", "X")
+                                                            ),
+                                                            column(6,
+                                                                   selectInput("p_1_theme", "Theme", 
+                                                                               c("Default (gray)" = "gray",
+                                                                                 "light" = "light",
+                                                                                 "bw" = "bw",
+                                                                                 "minimal" = "minimal",
+                                                                                 "classic" = "classic",
+                                                                                 "void" = "void",
+                                                                                 "dark" = "dark")
+                                                                   )
+                                                            ), 
+                                                            column(6,
+                                                                   spectrumInput(
+                                                                     inputId = "p_1_fill",
+                                                                     label = "Fill color",
+                                                                     choices = list(
+                                                                       list("steelblue", "forestgreen", "#C93312", "#DC863B", "#E1AF00" , "slateblue4"),
+                                                                       as.list(brewer_pal(palette = "Blues")(6)),
+                                                                       as.list(brewer_pal(palette = "Greens")(6)),
+                                                                       as.list(brewer_pal(palette = "Spectral")(6)),
+                                                                       as.list(brewer_pal(palette = "Dark2")(6))
+                                                                     ),
+                                                                     options = list(`toggle-palette-more-text` = "Show palette",
+                                                                                    `toggle-palette-less-text` = "Hide palette")
+                                                                   )
+                                                            ),
+                                                            icon = icon("palette"))
+                                       )
                                 )
                               ),
                               fluidRow(
-                                column(width = 3, offset = 6,
-                                       selectInput("trans_1", "Transformation",
-                                                   c("None" = "none",
-                                                     "Natural Logarithm" = "ln",
-                                                     "Inverse" = "inverse",
-                                                     "Others?" = "..."))
-                                ),
-                                column(width = 3,
-                                       selectInput("overlay_norm", "Overlay Normal Dist.",
-                                                   c("No" = "none",
-                                                     "Yes" = "yes")))
-                              ),
-                              fluidRow(
-                                column(width = 4,
-                                       wellPanel(
-                                         uiOutput("code_1_var")
-                                       )
-                                ),
                                 column(width = 8,
-                                       plotOutput("plot_1_var"))
+                                       plotOutput("plot_1_var")
+                                ),
+                                column(width = 4,
+                                       aceEditor("code_1_ace", "", wordWrap = T, theme = tolower(rstudioapi::getThemeInfo()$editor), mode = "r"),
+                                       actionButton("insert_code_1", "Insert code in script")
+                                )
                               )
                             )
-                            
                    ),
+                   ############################################################
+                   ###############      2 VARIABLES
+                   ##############
+                   #############################################################
                    tabPanel(title = "2 Variables", icon = icon("chart-line"),
                             fluidPage(
                               fluidRow(
@@ -137,48 +170,86 @@ shiny_gogo <- function(dataset){
                                          "This is help text"
                                        )
                                 ),
-                                column(3,
-                                       varSelectInput("x_2", "X", dataset)
-                                ),
-                                column(3, 
-                                       varSelectInput("y_2", "Y", dataset)
-                                ),
-                                br(),
-                                column(3, offset = 6, 
-                                       selectInput("plot_2_1", "Plot Type",
-                                                   c("Scatter" = "scatter",
-                                                     "Line" = "line",
-                                                     "Violin" = "violin",
-                                                     "Boxplot" = "box",
-                                                     "Bar" = "bar",
-                                                     "Smooth" = "smooth")
+                                column(6, 
+                                       tabsetPanel(type = "tabs", id = "tab_2_var",
+                                                   tabPanel("Layout", value = "l",
+                                                            column(6,
+                                                                   varSelectInput("x_2", "X", dataset)
+                                                            ),
+                                                            column(6,
+                                                                   varSelectInput("y_2", "Y", dataset)
+                                                            ),
+                                                            br(),
+                                                            column(6, 
+                                                                   selectInput("geom_2_1", "Plot Type",
+                                                                               c("Scatter" = "scatter",
+                                                                                 "Line" = "line",
+                                                                                 "Violin" = "violin",
+                                                                                 "Boxplot" = "box",
+                                                                                 "Bar" = "bar",
+                                                                                 "Smooth" = "smooth")
+                                                                   )
+                                                            ),
+                                                            column(6,
+                                                                   selectInput("geom_2_2", "Plot Type 2",
+                                                                               c("None" = "NULL",
+                                                                                 "Scatter" = "scatter",
+                                                                                 "Line" = "line",
+                                                                                 "Violin" = "violin",
+                                                                                 "Boxplot" = "box",
+                                                                                 "Bar" = "bar",
+                                                                                 "Smooth" = "smooth")
+                                                                   )
+                                                                   
+                                                            ),
+                                                            icon = icon("chart-line")
+                                                   ),
+                                                   tabPanel("Styling", value = "s",
+                                                            column(6,
+                                                                   textInput("p_2_x_lab", "X label", "X")
+                                                            ),
+                                                            column(6,
+                                                                   textInput("p_2_y_lab", "Y label", "Y")
+                                                            ),
+                                                            column(6,
+                                                                   selectInput("p_2_shape", "Geom 1 shape", shape_opts())
+                                                            ),
+                                                            column(6,
+                                                                   spectrumInput(
+                                                                     inputId = "p_2_color",
+                                                                     label = "Geom 2 color",
+                                                                     choices = list(
+                                                                       list("steelblue", "forestgreen", "#C93312", "#DC863B", "#E1AF00" , "slateblue4"),
+                                                                       as.list(brewer_pal(palette = "Blues")(6)),
+                                                                       as.list(brewer_pal(palette = "Greens")(6)),
+                                                                       as.list(brewer_pal(palette = "Spectral")(6)),
+                                                                       as.list(brewer_pal(palette = "Dark2")(6))
+                                                                     ),
+                                                                     options = list(`toggle-palette-more-text` = "Show palette",
+                                                                                    `toggle-palette-less-text` = "Hide palette")
+                                                                   )
+                                                            ),
+                                                            
+                                                            icon = icon("palette")
+                                                   ) 
                                        )
-                                ),
-                                column(3,
-                                       selectInput("plot_2_1", "Plot Type 2",
-                                                   c("None" = "none",
-                                                     "Scatter" = "scatter",
-                                                     "Line" = "line",
-                                                     "Violin" = "violin",
-                                                     "Boxplot" = "box",
-                                                     "Bar" = "bar",
-                                                     "Smooth" = "smooth")
-                                       )
-                                       
-                                )         
+                                )
                               ),
                               fluidRow(
-                                column(width = 4,
-                                       wellPanel(
-                                         uiOutput("code_2_var")
-                                       )
-                                ),
                                 column(width = 8,
                                        plotOutput("plot_2_var")
+                                ),
+                                column(width = 4,
+                                       aceEditor("code_2_ace", "", wordWrap = T, theme = tolower(rstudioapi::getThemeInfo()$editor), mode = "r"),
+                                       actionButton("insert_code_2", "Insert code in script")
                                 )
                               )
                             )
                    ),
+                   ############################################################
+                   ###############      GROUPING
+                   ##############
+                   #############################################################
                    tabPanel(title = "Grouping", icon = icon("group"),
                             fluidPage(
                               fluidRow(
@@ -187,36 +258,133 @@ shiny_gogo <- function(dataset){
                                          "This is help text"
                                        )
                                 ),
-                                column(3,
-                                       selectInput("group_plot", "Choose plot", 
-                                                   c("1 variable" = "1_var_plot",
-                                                     "2 varaibles" = "2_var_plot"))
-                                ),
-                                column(3, 
-                                       varSelectInput("group_color", "Color", dataset)
-                                ),
-                                br(),
-                                column(3, offset = 6, 
-                                       varSelectInput("group_fill", "Fill", dataset)
-                                ),
-                                column(3,
-                                       varSelectInput("plot_2_1", "Plot Type 2", dataset)
-                                       
-                                )         
+                                column(6,
+                                       tabsetPanel(type = "tabs", id = "tab_group",
+                                                   tabPanel("Layout", value = "l",
+                                                            column(6,
+                                                                   selectInput("group_plot", "Choose plot",
+                                                                               c("1 variable" = "1_var_plot",
+                                                                                 "2 variables" = "2_var_plot"))
+                                                            ),
+                                                            column(6,
+                                                                   selectInput("group_color", "Color", c("None" = "NULL", columns))
+                                                            ),
+                                                            br(),
+                                                            column(6,
+                                                                   selectInput("group_fill", "Fill", c("None" = "NULL", columns))
+                                                            ),
+                                                            column(6,
+                                                                   selectInput("group_facet", "Facet", c("None" = "NULL", columns))
+                                                                   
+                                                            ), icon = icon("group")
+                                                   ),
+                                                   tabPanel("Styling", value = "s",
+                                                            # PALETTE, OPACITY, COORD FLIP, LEGEND POSITION
+                                                            column(6,
+                                                                   selectizeInput("group_palette", "Palette", choices = list(
+                                                                     "Default" = "NULL",
+                                                                     Discrete = c(
+                                                                       "Dark2" = "Dark2",
+                                                                       "Greens" = "Greens",
+                                                                       "YlOrRd" = "YlOrRd"),
+                                                                     Continuous = c(
+                                                                       "Viridis" = "viridis",
+                                                                       "Inferno" = "inferno",
+                                                                       "Plasma" = "plasma")
+                                                                     
+                                                                   )
+                                                                   )
+                                                            ),
+                                                            column(6,
+                                                                   selectInput("group_legend", "Legend position", 
+                                                                               c("Right" = "right",
+                                                                                 "Top" = "top",
+                                                                                 "Bottom" = "bottom",
+                                                                                 "Remove" = "none")
+                                                                   )
+                                                            ),
+                                                            br(), 
+                                                            column(6,
+                                                                   sliderInput("group_alpha", "Geom 1 opacity", 0, 1, 1, 0.2)
+                                                            ),
+                                                            column(6,
+                                                                   switchInput(inputId = "group_coord_flip", label = strong("Flip axes"), value = FALSE, onLabel = "", offLabel = "")),
+                                                            
+                                                            icon = icon("palette")
+                                                   )
+                                       )
+                                )
                               ),
                               fluidRow(
-                                column(width = 4,
-                                       wellPanel(
-                                         uiOutput("code_2_var")
-                                       )
-                                ),
                                 column(width = 8,
-                                       plotOutput("plot_2_var")
+                                       plotOutput("plot_3_var")
+                                ),
+                                column(width = 4,
+                                       aceEditor("code_3_ace", "", wordWrap = T, theme = tolower(rstudioapi::getThemeInfo()$editor), mode = "r"),
+                                       actionButton("insert_code_3", "Insert code in script")
                                 )
                               )
                             )
                    ),
-                   tabPanel(title = "Making it pretty!", icon = icon("child")
+                   tabPanel(title = "Making it pretty!", icon = icon("child"),
+                            fluidPage(
+                              fluidRow(
+                                column(6,
+                                       wellPanel(
+                                         "This is help text"
+                                       )
+                                ),
+                                column(3,
+                                       textInput("p_title", "Title", "Your Title")
+                                ),
+                                column(3,
+                                       selectInput("p_theme", "Theme", 
+                                                   c("Default (gray)" = "gray",
+                                                     "light" = "light",
+                                                     "bw" = "bw",
+                                                     "minimal" = "minimal",
+                                                     "classic" = "classic",
+                                                     "void" = "void",
+                                                     "dark" = "dark")
+                                       )
+                                ),
+                                br(),
+                                column(3, offset = 6,
+                                       textInput("p_x_lab", "X label", "X-variable")
+                                ),
+                                column(3,
+                                       textInput("p_y_lab", "Y label", "Y-variable")
+                                ),
+                                br(),
+                                column(3, offset = 6,
+                                       selectizeInput("p_col", "Geom color", c("NULL", colors()), multiple = F)
+                                ),
+                                column(3,
+                                       sliderInput("p_alpha", "Geom opacity", 0, 1, 1, 0.2)
+                                ),
+                                br(),
+                                column(3, offset = 6,
+                                       selectInput("p_shape", "Geom shape", shape_opts())
+                                ),
+                                column(3,
+                                       selectInput("p_legend", "Legend position", 
+                                                   c("Right" = "right",
+                                                     "Top" = "top",
+                                                     "Bottom" = "bottom",
+                                                     "Remove" = "none")
+                                       )
+                                )
+                              )
+                            ),
+                            fluidRow(
+                              column(width = 8,
+                                     plotOutput("plot_4_var")
+                              ),
+                              column(width = 4,
+                                     aceEditor("code_4_ace", "", wordWrap = T, theme = tolower(rstudioapi::getThemeInfo()$editor), mode = "r"),
+                                     actionButton("insert_code_4", "Insert code in script")
+                              )
+                            )
                    ),
                    navbarMenu(title = "About", icon = icon("info"),
                               tabPanel("The app"),
@@ -229,65 +397,281 @@ shiny_gogo <- function(dataset){
   
   # textAreaInput
   
-  server <- function(input, output) { 
-    print(dataset)
+  server <- function(input, output, session) { 
+    source("ggplot_string.R")
     
-    output$skim_factor <- renderDT({
-      dataset %>%
-        select(where(is.factor)) %>%
-        skim() %>%
-        as_tibble() %>%
-        select(skim_variable, n_missing, factor.n_unique, factor.top_counts) %>% 
-        rename_at(vars(starts_with("factor")),
-                  funs(str_replace(., "factor.", ""))) %>% 
-        rename(variable = skim_variable) %>% 
-        rename_all(funs(str_replace(., "_", " "))) %>% 
-        rename_with(capitalize)
-    }, 
-    options = dt_options, 
-    rownames = F
-    )
+    ######################### Setting reactive values
+    vars <- c("x_1", "graph_1", "trans_1", "overlay_norm",
+              "p_1_x_lab", "p_1_title", "p_1_fill", "p_1_theme",
+              # 2 vars
+              "x_2", "y_2", "geom_2_1", "geom_2_2",
+              "p_2_x_lab", "p_2_y_lab", "p_2_shape", "p_2_color",
+              # grouping
+              "group_plot", "group_color", "group_fill", "group_facet",
+              "group_alpha", "group_coord_flip", "group_palette", "group_legend",
+              "p_col", "p_alpha", "p_shape", "p_legend",
+              "p_x_lab", "p_y_lab", "p_title", "p_theme")
+    
+    show_styling_vars <- c("tab_1_var", "tab_2_var", "tab_group")
+    
+    values <- reactiveValues()
+    
+    for(var in show_styling_vars){
+      values[[var]] <- FALSE
+    }
+    
+    for (var in vars){
+      values[[var]] <- NULL
+    }
+    
+    obs_up <- function(variable){
+      observeEvent(input[[variable]], {
+        values[[variable]] <- input[[variable]]
+      })
+    }
+    lapply(vars, obs_up)
+    
+    ######################### OUTPUTS FOR TAB 1 - SUMMARY STATS
+    
+    # Show flowchart
+    output$flow_chart <- renderImage({
+      filename <- normalizePath(file.path('./images', 'example.jpg'))
+      
+      list(src = filename,
+           alt = "Fun text!")
+    }, deleteFile = FALSE)
+    
+    # insert code
+    insert_code <- function(button, code){
+      observeEvent(input[[button]], {
+        context <- rstudioapi::getSourceEditorContext()
+        rstudioapi::insertText(text = paste0("\n", values[[code]], "\n"), id = context$id)
+      })
+    }
+    
+    insert_code("insert_code_intro", "code_intro_ace")
+    
+    # Update vals
+    observeEvent(input$code_intro_ace, {
+      values$code_intro_ace <- input$code_intro_ace
+    })
+    
+    # Render output (if text)
+    output$intro_output <- renderText({
+      return(eval(parse(text = values$code_intro_ace)))
+    })
     
     
-    output$skim_numeric <- renderDT({
-      dataset %>%
-        select(where(is.numeric)) %>%
-        skim() %>%
-        as_tibble() %>% 
-        select(skim_variable, n_missing, numeric.mean, numeric.sd, numeric.hist) %>% 
-        rename_at(vars(starts_with("numeric")),
-                  funs(str_replace(., "numeric.", ""))) %>% 
-        mutate_if(is.numeric, funs(round(., 2))) %>% 
-        rename(Variable = skim_variable,
-               Histogram = hist) %>% 
-        rename_all(funs(str_replace(., "_", " "))) %>%
-        rename_with(capitalize)
-    }, options = dt_options, rownames = F
-    )
     
-    output$dataframe <- renderDT({
-      head(dataset, 10)
-    },
-    options = dt_options
-    )
+    ################################## OUTPUT FOR TAB 2: 1 VARIABLE
     
-    output$code_1_var <- renderUI({
-      code("This is code")
+    # Set warning if variable not numeric and if histogram with continuous variable
+    observe( {
+      if(!is.numeric(dataset[[values$x_1]]) & values$graph_1 == "hist"){
+        showFeedbackWarning("x_1", "You need to add \'stat=\"count\"\' to geom_histogram to make it work with factors")
+      }
+      else if(!is.numeric(dataset[[values$x_1]]) & values$graph_1 %in% c("dens", "qq")){
+        showFeedbackWarning("x_1", "You should use continuous variables for this type of plot")
+      }
+      else{
+        hideFeedback("x_1")
+      }
+    })
+    
+    # Small helper (move?)
+    show_styling <- function(tab){
+      if(input[[tab]] == "s"){
+        values[[tab]] <- TRUE
+      }
+    }
+    
+    # Add styling if tab is clicked
+    observeEvent(input$tab_1_var, {show_styling("tab_1_var")})
+    
+    # Update code based on inputs
+    observe({
+      if (isTRUE(values$tab_1_var)) {
+        values$str_plot_1 <- {
+          init_layer <- create_init(x = values$x_1)
+          geoms <- create_geom(as.character(values$graph_1),
+                               fill = as.character(values$p_1_fill))
+          labs <- create_labs(title = values$p_1_title,
+                              x = values$p_1_x_lab)
+          theme <- create_std_theme(values$p_1_theme)
+          
+          final_str <- combine_string(init_layer = init_layer, geoms = geoms, labs = labs, theme_std = theme)}
+      }
+      else {
+        values$str_plot_1 <- {
+          init_layer <- create_init(x = values$x_1)
+          geoms <- create_geom(as.character(values$graph_1))
+          final_str <- combine_string(init_layer = init_layer, geoms = geoms)
+        }
+      }
+    })
+    
+    
+    # Update code block based on selectInput
+    observe({
+      updateAceEditor(session, "code_1_ace", values$str_plot_1)
+    })
+    
+    # Update plot code after input
+    observeEvent(input$code_1_ace, {
+      values$code_1_ace <- input$code_1_ace
     })
     
     output$plot_1_var <- renderPlot({
-      ggplot(dataset, aes(Petal.Length)) + 
-        geom_density()
+      return(eval(parse(text = values$code_1_ace)))
     })
     
-    output$code_2_var <- renderUI({
-      code("This is more code")
+    ## Insert code
+    insert_code("insert_code_1", "code_1_ace")
+    
+    
+    
+    ########################## OUTPUT TAB 2: 2 VARIABLES
+    
+    observeEvent(input$tab_2_var, {show_styling("tab_2_var")})
+    
+    ## Warning if violin or boxplot with non-factor x-variable
+    observe( {
+      feedbackWarning("geom_2_1", input$geom_2_1 %in% c("violin", "box") & is.numeric(dataset[[input$x_2]]), 
+                      "The X variable should be numeric for this type of plot")
+    })
+    
+    observe( {
+      feedbackWarning("geom_2_2", input$geom_2_2 %in% c("violin", "box") & is.numeric(dataset[[input$x_2]]), 
+                      "The X variable should be numeric for this type of plot")
+    })
+    
+    
+    observe({
+      if (isTRUE(values$tab_2_var)){
+        values$str_plot_2 <- {
+          init_layer <- create_init(x = values$x_2, y = values$y_2)
+          geoms <- create_geom(c(as.character(values$geom_2_1), as.character(values$geom_2_2)),
+                               shape = c(values$p_2_shape, "NULL"),
+                               color = c("NULL", values$p_2_color)
+          )
+          labs <- create_labs(x = values$p_2_x_lab, y = values$p_2_y_lab)
+          final_str <- combine_string(init_layer = init_layer, geoms = geoms, labs = labs)}
+      }
+      else {
+        values$str_plot_2 <- {
+          init_layer <- create_init(x = values$x_2, y = values$y_2)
+          geoms <- create_geom(c(as.character(values$geom_2_1), as.character(values$geom_2_2)))
+          final_str <- combine_string(init_layer = init_layer, geoms = geoms)
+        }
+      }
+    })
+    
+    # Update code block based on selectInput
+    observe({
+      updateAceEditor(session, "code_2_ace", values$str_plot_2)
+    })
+    
+    # Update plot code after input
+    observeEvent(input$code_2_ace, {
+      values$code_2_ace <- input$code_2_ace
     })
     
     output$plot_2_var <- renderPlot({
-      ggplot(dataset, aes(Petal.Length, Petal.Width)) + 
-        geom_point()
+      return(eval(parse(text = values$code_2_ace)))
     })
+    insert_code("insert_code_2", "code_2_ace")
+    
+    
+    ######################33 OUTPUT TAB 3: GROUPINGS
+    
+    # "group_palette", "group_legend", "group_alpha", "group_coord_flip"
+    observeEvent(input$tab_group, {show_styling("tab_group")})
+    
+    # update plot
+    observe({
+      values$str_plot_3 <- {
+        if(values$group_plot == "1_var_plot"){
+          init_layer <- create_init(x = values$x_1, color = values$group_color, fill = values$group_fill)
+          geoms <- if_else(!isTRUE(values$tab_group),
+                           create_geom(as.character(values$graph_1)),
+                           create_geom(as.character(values$graph_1), alpha = values$group_alpha)
+          )
+        }
+        if(values$group_plot == "2_var_plot"){
+          init_layer <- create_init(x = values$x_2, y = values$y_2, color = values$group_color, fill = values$group_fill)
+          geoms <- if_else(!isTRUE(values$tab_group),
+                           create_geom(c(as.character(values$geom_2_1), as.character(values$geom_2_2))),
+                           create_geom(c(as.character(values$geom_2_1), as.character(values$geom_2_2)), alpha = c(values$group_alpha, "NULL"))
+          )
+        }
+        facet <- create_facet(as.character(values$group_facet))
+        legend_pos <- create_custom_theme(values$group_legend)
+        # flip <- create_coord_flip(..)
+        #  pal <- create_palette(..)
+        
+        final_str <- if_else(!isTRUE(values$tab_group),
+                             combine_string(init_layer = init_layer, geoms = geoms, facet = facet),
+                             combine_string(init_layer = init_layer, geoms = geoms, facet = facet, theme_custom = legend_pos)
+        )
+      }
+    })
+    
+    # Update code block based on selectInput
+    observe({
+      updateAceEditor(session, "code_3_ace", values$str_plot_3)
+    })
+    
+    # Update plot code after input
+    observeEvent(input$code_3_ace, {
+      values$code_3_ace <- input$code_3_ace
+    })
+    
+    output$plot_3_var <- renderPlot({
+      return(eval(parse(text = values$code_3_ace)))
+    })
+    
+    insert_code("insert_code_3", "code_3_ace")
+    
+    
+    ############################# OUTPUT TAB 4:  MAKING IT PRETTY
+    observe({
+      values$str_plot_4 <- {
+        if(values$group_plot == "1_var_plot"){
+          init_layer <- create_init(x = values$x_1, color = values$group_color, fill = values$group_fill)
+          geoms <- create_geom(as.character(values$graph_1), color = values$p_col, shape = values$p_shape, alpha = values$p_alpha)
+        }
+        if(values$group_plot == "2_var_plot"){
+          init_layer <- create_init(x = values$x_2, y = values$y_2, color = values$group_color, fill = values$group_fill)
+          geoms <- create_geom(c(as.character(values$geom_2_1), as.character(values$geom_2_2)), color = c(values$p_col, "NULL"), shape = c(values$p_shape, "NULL"), alpha = c(values$p_alpha, "NULL"))
+        }
+        labs <- create_labs(title = values$p_title, x = values$p_x_lab, y = values$p_y_lab)
+        plot_theme <- create_std_theme(values$p_theme)
+        legend <- create_custom_theme(values$p_legend)
+        
+        facet <- create_facet(as.character(values$group_facet))
+        final_str <- combine_string(init_layer = init_layer, 
+                                    geoms = geoms, 
+                                    facet = facet, 
+                                    labs = labs, 
+                                    theme_std = plot_theme, 
+                                    theme_custom = legend)}
+    })
+    
+    # Update code block based on selectInput
+    observe({
+      updateAceEditor(session, "code_4_ace", values$str_plot_4)
+    })
+    
+    # Update plot code after input
+    observeEvent(input$code_4_ace, {
+      values$code_4_ace <- input$code_4_ace
+    })
+    
+    output$plot_4_var <- renderPlot({
+      return(eval(parse(text = values$code_4_ace)))
+    })
+    
+    insert_code("insert_code_4", "code_4_ace")
     
   }
   
@@ -295,29 +679,9 @@ shiny_gogo <- function(dataset){
 }
 
 
-shiny_gogo(dataset = iris)
-
-launch_app <- function(datas, ...) {
- # file_path <- system.file("myapp.R", package = "mypackage")
-  if (!nzchar("app.R")) stop("Shiny app not found")
-  ui <- server <- NULL # avoid NOTE about undefined globals
-  source("app.R", local = TRUE)
-  server_env <- environment(server)
-  
-  # Here you add any variables that your server can find
-  server_env$dataset <- iris
-
-  app <- shiny::shinyApp(ui, server)
-  shiny::runApp(app, ...)
-}
+gglearn(dataset = iris)
 
 
-launch_app(datas = iris)
 
-launch_2 <- function(datas) {
-  ui <- server <- NULL
-  source("app.R", local = TRUE)
-  dataset = datas
-  shinyApp(ui, server)
-}
-launch_2(iris)
+
+
