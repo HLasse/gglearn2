@@ -573,5 +573,13 @@ gglearn(dataset = iris)
 
 
 
+# intro
+   # fjern indsæt i script
+# grouping:
+   # facet - warning ved num
+   # includer e.g. flip
+   # lav choose plot on til knapper
+
+
 
 
