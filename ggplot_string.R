@@ -2,7 +2,7 @@
 pacman::p_load(tidyverse, hash)
 
 create_init <- function(df = "dataset", x, y=NULL,
-                        fill=NULL, color=NULL, shape=NULL){
+                        fill=NULL, color=NULL, shape=NULL, add_trans=NULL){
   y <- str_to_null(y)
   fill <- str_to_null(fill)
   color <- str_to_null(color)
@@ -28,6 +28,39 @@ create_init <- function(df = "dataset", x, y=NULL,
   return(e_string)
 }
 
+
+
+geom_replace_arg <- function(str, arg_to_rep = "x", replacement) {
+  # # Example:
+  # geom_replace_arg("geom(aes(x    =df$TOTO, y = df$duck))",
+  #                  arg_to_rep = "x",
+  #                  replacement = "log(df$TOTO)")
+  
+  t <- str_match(str, paste0(arg_to_rep, "\\s*=.*?(,|\\))"))
+  end_sym <- t[length(t)]
+  
+  regex <- paste0(arg_to_rep, "\\s*=.*?[,|\\)]")
+  rep_str <- paste0(arg_to_rep, " = ", replacement, end_sym)
+  return (str_replace(str, pattern = regex, rep_str))
+}
+
+geom_extract_arg <- function(str, arg_to_extract = "x") {
+  # Returns first match
+  regex <- paste0(arg_to_extract, "\\s*=(.*?)[,|\\)]")
+  t <- str_match(str, pattern = regex)
+  return(t[2])
+}
+
+
+add_transform <- function(init_str, arg_to_trans = "x", transform) {
+  arg <- geom_extract_arg(init_str, arg_to_trans)
+  res <- geom_replace_arg(init_str, 
+                   arg_to_rep = arg_to_trans, 
+                   replacement = paste0(transform, "(", arg, ")")
+                   )
+  return(res)
+}
+
 geom_add_arg <- function(geom_str, arg, name){
   if (!is.null(arg)){
     x <- str_match(geom_str, "\\(.*\\)")
@@ -51,6 +84,16 @@ check_length <- function(x, len){
   } else {
     stop("length of geoms is above 1, but the length of the remainder of the arguments does not match")
   }
+}
+
+
+create_stat_geom <- function(type="overlay_norm", var = NULL){
+  h <- hash("overlay_norm" = paste0("stat_function(fun = dnorm, ",
+                                    "args = list(",
+                                    "mean = mean(dataset$", var, ")",
+                                    ", sd = sd(dataset$", var, ")))"))
+  geom_str <- as.character(h[[type]])
+  return(geom_str)
 }
 
 
@@ -86,7 +129,8 @@ create_geom <- function(geom, color=NULL, fill=NULL, shape=NULL, alpha=NULL){
             "scatter" = "geom_point()",
             "violin" = "geom_violin()",
             "box" = "geom_boxplot()",
-            "smooth" = "geom_smooth()"
+            "smooth" = "geom_smooth()",
+            "coord_flip" = "coord_flip()"
   )
   geom_str = h[[geom]]
   if (is.null(geom_str)){stop(paste("The geom,", geom, "is not implemented"))}
@@ -243,8 +287,8 @@ combine_string <- function(libraries = "library(ggplot2)",
 # libraries <- "library(ggplot2)"
 # init_layer <- create_init(x = x, y = y, fill = fill, color = color, shape = shape)
 # 
-# geoms <- c(create_geom("scatter"), create_geom("line"))
-# 
+# geoms <- create_geom(c("scatter", "coord_flip"))
+#  
 # std_theme <- create_std_theme(theme = "bw")
 # custom_theme <- create_custom_theme(rm_legend = F)
 # labs <- create_labs(title = "example", color = "BLOMSTER for helved")
@@ -262,4 +306,8 @@ combine_string <- function(libraries = "library(ggplot2)",
 # cat(e_string)
 # head(df)
 
+
+# TODO
+# Overlay normal
+# tranformations
 
