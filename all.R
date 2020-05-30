@@ -10,6 +10,12 @@ library(shinyFeedback)
 library(magick)
 library(ggimage)
 
+
+## RESOURCES
+# https://www.data-to-viz.com/
+# https://datavizm20.classes.andrewheiss.com/resource/
+# https://datavizm20.classes.andrewheiss.com/
+
 ## choose plot toggle knap
 #### i facet behold kun factor/fjern numeric
 gglearn <- function(dataset){
@@ -27,16 +33,17 @@ gglearn <- function(dataset){
                             useShinyFeedback(),
                             fluidPage(
                               fluidRow(
-                                column(width = 6,
+                                column(width = 8,
                                        panel(
-                                         p("gglearn is a tool for learning to code using ggplot2."),
+                                         h4("gglearn is a tool for learning to code using ggplot2"),
                                          p("The app is structured into 3 categories to help you learn the fundamentals of statistical plotting
                                            as well as basic ways of making your plots look pretty."),
                                          p("All tabs have an interactive code block which shows you the code used to produce the currently shown plot."),
-                                         p("Experiment with modifying the code and watch the plots change in response!")
+                                         p("Experiment with modifying the code and watch the plots change in response!"),
+                                         p("Unsure which type of plot is right for your needs? Check out the flowchart below", icon("arrow-down"))
                                        )
                                 ),
-                                column(width = 6, 
+                                column(width = 4, 
                                        aceEditor("code_intro_ace", "", wordWrap = T, theme = tolower(rstudioapi::getThemeInfo()$editor), 
                                                  mode = "r", height = "120px", value = 'print("Welcome to gglearn2!")'),
                                        verbatimTextOutput("intro_output")
@@ -59,11 +66,11 @@ gglearn <- function(dataset){
                               fluidRow(
                                 column(width = 6,
                                        panel(
-                                         p("1 variable plots are useful for investigating distributions."),
-                                         p("Density plots give you a sense of the general distribution by smoothing out the data"),
-                                         p("Histograms provides counts and a less-smooth representation of the distribution"),
-                                         p("QQ-plots easily lets you investigate whether your data follows the normal/Gaussian distribution. 
-                                           A straight line indicates perfect normality and a curved line indicates skewed data.")
+                                         p("All plots start with a call to", code("ggplot()"), "with the dataset and ", em("aes", .noWS = "after"),"thetic mappings between variables and visuals."),
+                                         p("This is followed by one or more ", em("geoms"), "which tell ggplot how to display the information."),
+                                         p(strong("Exercise:"), "Delete everything but the initial ", code("ggplot()"), "call. What happens?"),
+                                         p(strong("Exercise:"), "Once you are familiar with the geoms presented here, click the styling tab to customize their apperance.",
+                                           "Notice what happens in the code block!")
                                        )
                                 ),
                                 column(width = 6,
@@ -146,8 +153,11 @@ gglearn <- function(dataset){
                             fluidPage(
                               fluidRow(
                                 column(6,
-                                       wellPanel(
-                                         "This is help text"
+                                       panel(
+                                         p("Items added after the intial ", code("ggplot()"), "call are called", em("layers.")),
+                                         p("As the name implies, ", em("layers"), "can be added on top of each other using ", code("+"), "to create more and more sophisticated plots."),
+                                         p(strong("Exercise:"), "Experiment with using two different geoms. Does order matter?"),
+                                         p(strong("Exercise:"), "try adding a third geom of your own choice.")
                                        )
                                 ),
                                 column(6, 
@@ -236,8 +246,12 @@ gglearn <- function(dataset){
                             fluidPage(
                               fluidRow(
                                 column(6,
-                                       wellPanel(
-                                         "This is help text"
+                                       panel(
+                                         p("One of ggplot's strengths is in way you can easily show extra variables using the", em("color, fill, shape, and size"), "aesthetics."),
+                                         p("Using these aesthetics allows you to visualize differences between e.g. levels of a factor and 1 or more variables."),
+                                         p("Facetting splits the plot into multiple panes, one for each group you facet by."),
+                                         p(strong("Exercise:"), "Play around with color and fill. What's the difference between them?"),
+                                         p(strong("Exercise:"), "Add the", em("size"), "or", em("shape"), "aesthetic. How does your plot change?")
                                        )
                                 ),
                                 column(6,
@@ -305,7 +319,34 @@ gglearn <- function(dataset){
                    ###############      EXERCISES
                    ##############
                    #############################################################                   
-                   tabPanel(title = "Exercises", icon = icon("book")
+                   tabPanel(title = "Exercises",
+                            fluidRow(
+                              column(6, 
+                                     panel(
+                                       h3("Exercises"),
+                                       tags$ul(
+                                         tags$li("Create a scatter plot from scrath. Add a linear fit and color the points by a variable.", 
+                                                 tags$ul(
+                                                   tags$li("Change the theme to 'light' and move the legend to the top.")
+                                                 )),
+                                         br(),
+                                         tags$li("Create a violin plot with a boxplot on top, fill by a factor variable",
+                                                 tags$ul(
+                                                   tags$li("Flip the axes and use a palette to change the color.")
+                                                 )),
+                                         br(),
+                                         tags$li("Moar"),
+                                         tags$li("Even moar")
+                                       ) 
+                                     )
+                              ),
+                              column(6, 
+                                     panel("sds"))
+                            ),
+                            
+                            
+                            
+                            icon = icon("book")
                    ),
                    navbarMenu(title = "About", icon = icon("info"),
                               tabPanel("The app"),
