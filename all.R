@@ -361,7 +361,7 @@ gglearn <- function(dataset){
     # 
     
     output$flow_chart <- renderImage({
-      filename <- normalizePath(file.path('./images', 'example2.png'))
+      filename <- normalizePath(file.path('./flowchart', 'flowchart.png'))
       list(src = filename,
            height = "70%",
            width = "100%")
