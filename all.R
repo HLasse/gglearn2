@@ -13,7 +13,8 @@ library(shinyAce)
 library(shinyWidgets)
 library(scales)
 library(shinyFeedback)
-
+library(magick)
+library(ggimage)
 
 ## choose plot toggle knap
 
@@ -48,7 +49,10 @@ gglearn <- function(dataset){
                                        verbatimTextOutput("intro_output")
                                 ),
                                 hr(),
-                                imageOutput("flow_chart")
+                                column(width = 12,
+                                       imageOutput("flow_chart", height = "auto")
+                                )
+                                
                               )
                             )
                    ),
@@ -248,15 +252,15 @@ gglearn <- function(dataset){
                                                    tabPanel("Layout", value = "l",
                                                             column(6,
                                                                    
-                                                          tags$style(HTML(".chart_list { font-size: 30px; color: SteelBlue;}")),
-                                                          radioButtons("group_plot", label = "Choose plot",
-                                                                       choiceNames = list(icon("chart-area", class = "chart_list"), icon("chart-line", class = "chart_list")),
-                                                                       choiceValues = list("1_var_plot", "2_var_plot"), inline = T)
+                                                                   tags$style(HTML(".chart_list { font-size: 30px; color: SteelBlue;}")),
+                                                                   radioButtons("group_plot", label = "Choose plot",
+                                                                                choiceNames = list(icon("chart-area", class = "chart_list"), icon("chart-line", class = "chart_list")),
+                                                                                choiceValues = list("1_var_plot", "2_var_plot"), inline = T)
                                                             ),
                                                             column(6,
                                                                    selectInput("group_color", "Color", c("None" = "NULL", columns))
                                                             ),
-                                                           # br(),
+                                                            # br(),
                                                             column(6,
                                                                    selectInput("group_fill", "Fill", c("None" = "NULL", columns))
                                                             ),
@@ -357,11 +361,17 @@ gglearn <- function(dataset){
     ######################### OUTPUTS FOR TAB 1 - SUMMARY STATS
     
     # Show flowchart
+    # output$flow_chart <- renderPlot({
+    #   filename <- normalizePath(file.path('./images', 'example2.png'))
+    #   ggbackground(ggplot(), filename )# + theme(aspect.ratio = 1), filename)
+    # }, height=function() { session$clientData$output_flow_chart_width * 0.7 })
+    # 
+    
     output$flow_chart <- renderImage({
-      filename <- normalizePath(file.path('./images', 'example.jpg'))
-      
+      filename <- normalizePath(file.path('./images', 'example2.png'))
       list(src = filename,
-           alt = "Fun text!")
+           height = "70%",
+           width = "100%")
     }, deleteFile = FALSE)
     
     # Update vals
@@ -577,11 +587,6 @@ gglearn <- function(dataset){
 
 
 gglearn(dataset = iris)
-
-
-# grouping:
-   # lav choose plot on til knapper
-
 
 
 

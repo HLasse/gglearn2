@@ -42,3 +42,4 @@ palette_opts <- function(){
       "Plasma" = "plasma")
   )
 }
+
