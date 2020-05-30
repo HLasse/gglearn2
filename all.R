@@ -2,13 +2,7 @@
 
 library(shiny)
 library(shinythemes)
-
-library(tidyverse)
-library(DT)
-library(skimr)
-library(listviewer)
-library(knitr)
-library(kableExtra)
+library(ggplot2)
 library(shinyAce)
 library(shinyWidgets)
 library(scales)
@@ -17,7 +11,6 @@ library(magick)
 library(ggimage)
 
 ## choose plot toggle knap
-
 #### i facet behold kun factor/fjern numeric
 gglearn <- function(dataset){
   
