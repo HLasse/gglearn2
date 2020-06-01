@@ -353,7 +353,7 @@ gglearn <- function(dataset){
                                        p(a("ggplot2: Elegant Graphics for Data Analysis", href="https://ggplot2-book.org/")),
                                        br(),
                                        h4("Free Online Courses:"),
-                                       p(a("Andreas Heiss' Data Visualization Course", href="https://datavizm20.classes.andrewheiss.com/")),
+                                       p(a("AndreW Heiss' Data Visualization Course", href="https://datavizm20.classes.andrewheiss.com/")),
                                        br(),
                                        h4("Misc."),
                                        p(a("Cheatsheets from RStudio", href="https://rstudio.com/resources/cheatsheets/")),
