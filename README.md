@@ -8,9 +8,9 @@ devtools::install_github("HLasse/gglearn2")
 ```
 
 ### Usage
-To start the Shiny app, simply run:
+To start the Shiny app with your desired dataframe (df), simply run:
 
 ```r
-gglearn(dataset)
+gglearn(dataset = df)
 ```
-with the dataframe you want to use.
+
