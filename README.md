@@ -1,5 +1,7 @@
 # gglearn2
-An interactive learning environment for ggplot 2 using Shiny
+An interactive learning environment for ggplot 2 using Shiny R.
+
+Demo available [here](https://hlasse.shinyapps.io/gglearn2/)
 
 ### Installation
 
