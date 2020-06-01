@@ -1,7 +1,7 @@
 # gglearn2
 An interactive learning environment for ggplot 2 using Shiny R.
 
-Demo with read-only code block available [here](https://hlasse.shinyapps.io/gglearn2/)
+Online demo with read-only code block available [here](https://hlasse.shinyapps.io/gglearn2/)
 
 ### Installation
 
@@ -16,3 +16,5 @@ To start the Shiny app with your desired dataframe (df), simply run:
 gglearn(dataset = df)
 ```
 
+### GIF demonstration
+![](gglearn.gif)
