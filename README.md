@@ -18,3 +18,7 @@ gglearn(dataset = df)
 
 ### GIF demonstration
 ![](gglearn.gif)
+
+----
+
+Created by [Lasse Hansen](https://github.com/HLasse/) and [Kenneth C. Enevoldsen](https://github.com/kennethenevoldsen/) for an exam in Human Computer Interaction at Aarhus University.
