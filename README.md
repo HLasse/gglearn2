@@ -20,7 +20,7 @@ gglearn(dataset = df)
 ![](gglearn.gif)
 
 
-Please submit any problems or suggestions for future developments in _Issues_
+Please submit any problems or suggestions for future developments in [Issues](https://github.com/HLasse/gglearn2/issues)
 
 
 ----
