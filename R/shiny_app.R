@@ -69,9 +69,10 @@ gglearn <- function(dataset){
                               fluidRow(
                                 column(width = 6,
                                        panel(
-                                         p("All plots start with a call to", code("ggplot()"), "with the dataset and ", em("aes", .noWS = "after"),"thetic mappings between variables and visuals."),
+                                         p("All plots start with a call to", code("ggplot()"), "with the dataset and ", "aesthetic", code("aes()"), "mappings between variables and visuals."),
                                          p("This is followed by one or more ", em("geoms"), "which tell ggplot how to display the information."),
-                                         p(strong("Exercise:"), "Delete everything but the initial ", code("ggplot()"), "call. What happens?"),
+                                         p(strong("Exercise:"), "Delete everything after and including the ", code("+"), "What do you think happens?"),
+                                         p(strong("Exercise:"), "Play around with the different options and drop-downs to the right. Notice the changes to the code!"),
                                          p(strong("Exercise:"), "Once you are familiar with the geoms presented here, click the styling tab to customize their apperance.",
                                            "Notice what happens in the code block!")
                                        )
@@ -160,7 +161,7 @@ gglearn <- function(dataset){
                                          p("Items added after the intial ", code("ggplot()"), "call are called", em("layers.")),
                                          p("As the name implies, ", em("layers"), "can be added on top of each other using ", code("+"), "to create more and more sophisticated plots."),
                                          p(strong("Exercise:"), "Experiment with using two different geoms. Does order matter?"),
-                                         p(strong("Exercise:"), "try adding a third geom of your own choice using the code block.")
+                                         p(strong("Exercise:"), "Try adding a third geom of your own choice using the code block.")
                                        )
                                 ),
                                 column(6,
@@ -179,7 +180,6 @@ gglearn <- function(dataset){
                                                                                  "Line" = "line",
                                                                                  "Violin" = "violin",
                                                                                  "Boxplot" = "box",
-                                                                                 "Bar" = "bar",
                                                                                  "Smooth" = "smooth",
                                                                                  "Smooth (linear)" = "lm")
                                                                    )
@@ -250,9 +250,9 @@ gglearn <- function(dataset){
                               fluidRow(
                                 column(6,
                                        panel(
-                                         p("One of ggplot's strengths is in way you can easily show extra variables using the", em("color, fill, shape, and size"), "aesthetics."),
+                                         p("One of ggplot's strengths is its ability to easily show extra variables using the", em("color, fill, shape"), "and", em("size"), "aesthetics."),
                                          p("Using these aesthetics allows you to visualize differences between e.g. levels of a factor and 1 or more variables."),
-                                         p("Facetting splits the plot into multiple panes, one for each group you facet by."),
+                                         p(em("Facet"), "will split the plot into multiple panes, one for each group you", em("facet"), "by."),
                                          p(strong("Exercise:"), "Play around with color and fill. What's the difference between them?"),
                                          p(strong("Exercise:"), "Add the", em("size"), "or", em("shape"), "aesthetic. How does your plot change?")
                                        )
