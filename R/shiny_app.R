@@ -24,12 +24,6 @@
 #'@export
 gglearn <- function(dataset){
 
-  #
-  # div(
-  #   img(src = "img/helloworld.jpg")
-  # )
-
-
   # Get named list of columns in dataset
   columns <- setNames(as.list(names(dataset)), names(dataset))
 
