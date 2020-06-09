@@ -17,7 +17,7 @@ Imports:
   shinyAce,
   shinyWidgets,
   scales,
-  shinyFeedback,
+  shinyFeedback (>= 0.2.0),
   magick,
   ggimage,
   stringr,
