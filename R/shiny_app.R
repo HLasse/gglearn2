@@ -414,7 +414,7 @@ gglearn <- function(dataset){
         showFeedbackWarning("x_1", "You should use continuous variables for this type of plot")
       }
       else{
-        hideFeedback("x_1")
+        shinyFeedback::hideFeedback("x_1")
       }
     })
 
