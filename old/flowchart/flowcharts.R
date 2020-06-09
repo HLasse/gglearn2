@@ -31,14 +31,12 @@ lin <- ggplot(filter(gapminder, country == "Uruguay"), aes(year, lifeExp)) +
   rm_theme()
 
 # Boxplot
-box <- ggplot(filter(gapminder, country == "Uruguay"), aes(country, lifeExp)) +
+box <- ggplot(filter(gapminder, country %in%  c("Uruguay", "Paraguay")), aes(country, lifeExp)) +
   geom_boxplot(color = "black") +
-  lims(y = c(65, 80))+
   rm_theme()
 # Violin
-viol <- ggplot(filter(iris, Species == "setosa"), aes(Species, Sepal.Length)) +
+viol <- ggplot(iris, aes(Species, Sepal.Length)) +
   geom_violin(color = "black") +
-  lims(y = c(4.2, 6))+
   rm_theme()
 
 # Density
@@ -64,9 +62,9 @@ plts <- c(qq, hist, dens,  viol,  box, lin,  p_loess,  p_lm,  point)
 nam <- c("qq", "hist", "dens", "violin", "box", "line", "smooth", "linear", "scatter")
 
 i <- 1
-for (plt in to_save){
+for (plt in plts){
   ggsave(paste0(nam[i], ".png"), plt, width = 2.256, height = 1.38, units = "in")
   i <- i + 1
 }
 
-ggsave("qq.png", qq, width = 2.256, height = 1.38, units = "in")
+#ggsave("box.png", box, width = 2.256, height = 1.38, units = "in")

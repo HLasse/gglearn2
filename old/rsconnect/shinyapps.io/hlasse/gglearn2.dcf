@@ -1,0 +1,13 @@
+name: gglearn2
+title: gglearn2
+username:
+account: hlasse
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2389058
+bundleId: 3214131
+url: https://hlasse.shinyapps.io/gglearn2/
+when: 1591018888.3293
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: all.R|download_stats.R|example.R|ggplot_string.R|helpers.R|README.md|supervision_notes.txt|flowchart/flowcharts.R

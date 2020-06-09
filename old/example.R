@@ -13,6 +13,11 @@ binner <- function(dataset) {
     output$hist <- renderPlot(
       ggplot(dataset, aes(x = eruptions)) + geom_histogram(bins = input$n) 
     )
+    source("helpers.R")
+    
+
+    
+    
   }
     
   shinyApp(ui, server)

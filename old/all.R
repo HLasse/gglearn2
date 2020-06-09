@@ -7,11 +7,8 @@ library(shinyAce)
 library(shinyWidgets)
 library(scales)
 library(shinyFeedback)
-library(magick)
-library(ggimage)
 
-## choose plot toggle knap
-#### i facet behold kun factor/fjern numeric
+
 gglearn <- function(dataset){
   
   source("helpers.R")
@@ -27,19 +24,15 @@ gglearn <- function(dataset){
                             useShinyFeedback(),
                             fluidPage(
                               fluidRow(
-                                column(width = 6,
+                                column(width = 8,
                                        panel(
-                                         p("gglearn is a tool for learning to code using ggplot2."),
+                                         h4("gglearn is a tool for learning to code using ggplot2"),
                                          p("The app is structured into 3 categories to help you learn the fundamentals of statistical plotting
                                            as well as basic ways of making your plots look pretty."),
                                          p("All tabs have an interactive code block which shows you the code used to produce the currently shown plot."),
-                                         p("Experiment with modifying the code and watch the plots change in response!")
+                                         p("Experiment with modifying the code and watch the plots change in response!"),
+                                         p("Unsure which type of plot is right for your needs? Check out the flowchart below", icon("arrow-down"))
                                        )
-                                ),
-                                column(width = 6, 
-                                       aceEditor("code_intro_ace", "", wordWrap = T, theme = tolower(rstudioapi::getThemeInfo()$editor), 
-                                                 mode = "r", height = "120px", value = 'print("Welcome to gglearn2!")'),
-                                       verbatimTextOutput("intro_output")
                                 ),
                                 hr(),
                                 column(width = 12,
@@ -59,18 +52,18 @@ gglearn <- function(dataset){
                               fluidRow(
                                 column(width = 6,
                                        panel(
-                                         p("1 variable plots are useful for investigating distributions."),
-                                         p("Density plots give you a sense of the general distribution by smoothing out the data"),
-                                         p("Histograms provides counts and a less-smooth representation of the distribution"),
-                                         p("QQ-plots easily lets you investigate whether your data follows the normal/Gaussian distribution. 
-                                           A straight line indicates perfect normality and a curved line indicates skewed data.")
+                                         p("All plots start with a call to", code("ggplot()"), "with the dataset and ", em("aes", .noWS = "after"),"thetic mappings between variables and visuals."),
+                                         p("This is followed by one or more ", em("geoms"), "which tell ggplot how to display the information."),
+                                         p(strong("Exercise:"), "Delete everything but the initial ", code("ggplot()"), "call. What happens?"),
+                                         p(strong("Exercise:"), "Once you are familiar with the geoms presented here, click the styling tab to customize their apperance.",
+                                           "Notice what happens in the code block!")
                                        )
                                 ),
                                 column(width = 6,
                                        tabsetPanel(type = "tabs", id = "tab_1_var",
                                                    tabPanel("Layout", value = "l",
                                                             column(width = 6,
-                                                                   selectInput("graph_1", "Graph Type",
+                                                                   selectInput("graph_1", "Geom",
                                                                                c("Density" = "dens",
                                                                                  "Histogram" = "hist",
                                                                                  "QQ Plot" = "qq"))
@@ -146,8 +139,11 @@ gglearn <- function(dataset){
                             fluidPage(
                               fluidRow(
                                 column(6,
-                                       wellPanel(
-                                         "This is help text"
+                                       panel(
+                                         p("Items added after the intial ", code("ggplot()"), "call are called", em("layers.")),
+                                         p("As the name implies, ", em("layers"), "can be added on top of each other using ", code("+"), "to create more and more sophisticated plots."),
+                                         p(strong("Exercise:"), "Experiment with using two different geoms. Does order matter?"),
+                                         p(strong("Exercise:"), "try adding a third geom of your own choice using the code block.")
                                        )
                                 ),
                                 column(6, 
@@ -161,7 +157,7 @@ gglearn <- function(dataset){
                                                             ),
                                                             br(),
                                                             column(6, 
-                                                                   selectInput("geom_2_1", "Plot Type",
+                                                                   selectInput("geom_2_1", "Geom 1",
                                                                                c("Scatter" = "scatter",
                                                                                  "Line" = "line",
                                                                                  "Violin" = "violin",
@@ -172,7 +168,7 @@ gglearn <- function(dataset){
                                                                    )
                                                             ),
                                                             column(6,
-                                                                   selectInput("geom_2_2", "Plot Type 2",
+                                                                   selectInput("geom_2_2", "Geom 2",
                                                                                c("None" = "NULL",
                                                                                  "Scatter" = "scatter",
                                                                                  "Line" = "line",
@@ -236,8 +232,12 @@ gglearn <- function(dataset){
                             fluidPage(
                               fluidRow(
                                 column(6,
-                                       wellPanel(
-                                         "This is help text"
+                                       panel(
+                                         p("One of ggplot's strengths is in way you can easily show extra variables using the", em("color, fill, shape, and size"), "aesthetics."),
+                                         p("Using these aesthetics allows you to visualize differences between e.g. levels of a factor and 1 or more variables."),
+                                         p("Facetting splits the plot into multiple panes, one for each group you facet by."),
+                                         p(strong("Exercise:"), "Play around with color and fill. What's the difference between them?"),
+                                         p(strong("Exercise:"), "Add the", em("size"), "or", em("shape"), "aesthetic. How does your plot change?")
                                        )
                                 ),
                                 column(6,
@@ -302,16 +302,51 @@ gglearn <- function(dataset){
                             )
                    ),
                    ############################################################
-                   ###############      EXERCISES
+                   ###############      Challenges
                    ##############
                    #############################################################                   
-                   tabPanel(title = "Exercises", icon = icon("book")
+                   tabPanel(title = "Challenges",
+                            fluidRow(
+                              column(6, 
+                                     panel(
+                                       h3("Exercises"),
+                                       "Easy: Create a histogram and flip the axes.",
+                                       tags$ul(
+                                         tags$li("Fill by a factor variable (hint: check out the 'grouping' panel.")
+                                       ),
+                                       "Medium: Create a violin plot with a factor variable on the X-axis",
+                                       tags$ul(
+                                         tags$li("Flip the axes.")
+                                       ),
+                                       "Hard: Create a violin plot with a boxplot on top.",
+                                       tags$ul(
+                                         tags$li("Fill the plots with different colors.")
+                                       )
+                                     )
+                              )
+                            ),
+                            icon = icon("trophy")
                    ),
-                   navbarMenu(title = "About", icon = icon("info"),
-                              tabPanel("The app"),
-                              tabPanel("The authors"))
-                   
-                   
+                   tabPanel(title = "Resources",
+                            fluidRow(
+                              column(6, 
+                                     panel(
+                                       h3("Resources"),
+                                       h4("Books:"),
+                                       p(a("ggplot2: Elegant Graphics for Data Analysis", href="https://ggplot2-book.org/")),
+                                       br(),
+                                       h4("Free Online Courses:"),
+                                       p(a("Andreas Heiss' Data Visualization Course", href="https://datavizm20.classes.andrewheiss.com/")),
+                                       br(),
+                                       h4("Misc."),
+                                       p(a("Cheatsheets from RStudio", href="https://rstudio.com/resources/cheatsheets/")),
+                                       p(a("The R Graph Gallery", href="https://www.r-graph-gallery.com/")),
+                                       p(a("Make beautiful ggplots", href="https://cedricscherer.netlify.com/2019/08/05/a-ggplot2-tutorial-for-beautiful-plotting-in-r/"))
+                                     )
+                              )
+                            ),
+                            icon = icon("book")
+                   )
   )
   
   
@@ -351,14 +386,7 @@ gglearn <- function(dataset){
     }
     lapply(vars, obs_up)
     
-    ######################### OUTPUTS FOR TAB 1 - SUMMARY STATS
-    
-    # Show flowchart
-    # output$flow_chart <- renderPlot({
-    #   filename <- normalizePath(file.path('./images', 'example2.png'))
-    #   ggbackground(ggplot(), filename )# + theme(aspect.ratio = 1), filename)
-    # }, height=function() { session$clientData$output_flow_chart_width * 0.7 })
-    # 
+    ######################### OUTPUTS FOR TAB 1 - FLOWCHART
     
     output$flow_chart <- renderImage({
       filename <- normalizePath(file.path('./flowchart', 'flowchart.png'))
@@ -366,17 +394,6 @@ gglearn <- function(dataset){
            height = "70%",
            width = "100%")
     }, deleteFile = FALSE)
-    
-    # Update vals
-    observeEvent(input$code_intro_ace, {
-      values$code_intro_ace <- input$code_intro_ace
-    })
-    
-    # Render output (if text)
-    output$intro_output <- renderText({
-      return(eval(parse(text = values$code_intro_ace)))
-    })
-    
     
     
     ################################## OUTPUT FOR TAB 2: 1 VARIABLE
@@ -473,6 +490,12 @@ gglearn <- function(dataset){
                       "The X variable should be a factor for this type of plot")
     })
     
+    observe( {
+      feedbackWarning("p_2_shape", input$geom_2_1 != "scatter" & input$p_2_shape != "NULL", 
+                      "The shape parameter only works with geom_point()")
+    })
+    
+    
     
     observe({
       if (isTRUE(values$tab_2_var)){
@@ -537,21 +560,24 @@ gglearn <- function(dataset){
         }
         if(values$group_plot == "2_var_plot"){
           init_layer <- create_init(x = values$x_2, y = values$y_2, color = values$group_color, fill = values$group_fill)
-          geoms <- if_else(!isTRUE(values$tab_group),
-                           create_geom(c(as.character(values$geom_2_1), as.character(values$geom_2_2))),
-                           create_geom(c(as.character(values$geom_2_1), as.character(values$geom_2_2)), alpha = c(values$group_alpha, "NULL"))
-          )
+          print(values$tab_group)
+          # Creates bugs if ifelse..
+          if (!isTRUE(values$tab_group)) { 
+            geoms <- create_geom(c(as.character(values$geom_2_1), as.character(values$geom_2_2)))
+          } else {
+            geoms <- create_geom(c(as.character(values$geom_2_1), as.character(values$geom_2_2)), alpha = c(values$group_alpha, "NULL"))
+          }
         }
         
         facet <- create_facet(as.character(values$group_facet))
         legend_pos <- create_custom_theme(values$group_legend)
         
-        final_str <- if_else(!isTRUE(values$tab_group),
-                             combine_string(init_layer = init_layer, geoms = geoms, facet = facet, 
-                                            palette_color = values$group_colo_palette, palette_fill = values$group_fill_palette),
-                             combine_string(init_layer = init_layer, geoms = geoms, facet = facet, 
-                                            palette_color = values$group_color_palette, palette_fill = values$group_fill_palette,
-                                            theme_custom = legend_pos)
+        final_str <- ifelse(!isTRUE(values$tab_group),
+                            combine_string(init_layer = init_layer, geoms = geoms, facet = facet, 
+                                           palette_color = values$group_colo_palette, palette_fill = values$group_fill_palette),
+                            combine_string(init_layer = init_layer, geoms = geoms, facet = facet, 
+                                           palette_color = values$group_color_palette, palette_fill = values$group_fill_palette,
+                                           theme_custom = legend_pos)
         )
       }
     })
@@ -580,6 +606,3 @@ gglearn <- function(dataset){
 
 
 gglearn(dataset = iris)
-
-
-
