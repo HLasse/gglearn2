@@ -534,7 +534,7 @@ combine_string <- function(libraries = "library(ggplot2)",
   # exception handling for qq
   x <- stringr::str_match(e_string, "geom_qq")[1, 1]
   if (! is.na(x) & x == "geom_qq"){
-    var <- str_match(e_string, "x = (.*)\\)")[, 2]
+    var <- stringr::str_match(e_string, "x = (.*)\\)")[, 2]
     e_string <- stringr::str_replace(e_string, "x = .*\\)",
                             paste0("sample = ", var, ")"))
   }
