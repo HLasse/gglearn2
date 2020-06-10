@@ -561,7 +561,6 @@ gglearn <- function(dataset){
         }
         if(values$group_plot == "2_var_plot"){
           init_layer <- create_init(x = values$x_2, y = values$y_2, color = values$group_color, fill = values$group_fill)
-          #print(values$tab_group)
           # Creates bugs if ifelse..
           if (!isTRUE(values$tab_group)) {
             geoms <- create_geom(c(as.character(values$geom_2_1), as.character(values$geom_2_2)))
