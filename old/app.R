@@ -10,8 +10,7 @@ library(shinyFeedback)
 
 library(tidyverse)
 library(hash)
-
-
+library(palmerpenguins)
 
 create_init <- function(df = "dataset", x, y=NULL,
                         fill=NULL, color=NULL, shape=NULL){
@@ -359,7 +358,7 @@ palette_opts <- function(){
 }
 
 
-dataset = iris
+dataset = penguins
 
 # Get named list of columns in dataset
 columns <- setNames(as.list(names(dataset)), names(dataset))
@@ -382,6 +381,13 @@ ui <- navbarPage("gglearn2", windowTitle = NULL, theme = "lumen",
                                        p("Unsure which type of plot is right for your needs? Check out the flowchart below", icon("arrow-down"))
                                      )
                               ),
+                              column(width = 4,
+                                     panel(
+                                       h4("Note"),
+                                       p("The online demo version uses the", a("penguins dataset", href="https://github.com/allisonhorst/palmerpenguins"),
+                                         "and features such as editing code are disabled. For the full experience and to use your own dataset, download the R package",
+                                         a("here", href ="https://github.com/HLasse/gglearn2"))
+                                     )),
                               hr(),
                               column(width = 12,
                                      imageOutput("flow_chart", height = "auto")
