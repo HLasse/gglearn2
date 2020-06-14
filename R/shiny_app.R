@@ -67,8 +67,7 @@ gglearn <- function(dataset){
                                          p("This is followed by one or more ", em("geoms"), "which tell ggplot how to display the information."),
                                          p(strong("Exercise:"), "Delete everything after and including the ", code("+"), "What do you think happens?"),
                                          p(strong("Exercise:"), "Play around with the different options and drop-downs to the right. Notice the changes to the code!"),
-                                         p(strong("Exercise:"), "Once you are familiar with the geoms presented here, click the styling tab to customize their apperance.",
-                                           "Notice what happens in the code block!")
+                                         p(strong("Exercise:"), "Once you are familiar with the geoms presented here, click the styling tab to customize their apperance.")
                                        )
                                 ),
                                 column(width = 6,
